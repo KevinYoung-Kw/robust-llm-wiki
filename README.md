@@ -2,6 +2,8 @@
 
 [中文](./README.zh-CN.md) | **English**
 
+![Robust LLM-Wiki Banner](./assets/github-banner-en.webp)
+
 Robust LLM-Wiki is an open-source practice framework.
 
 It is not a new content Wiki repository. Instead, it turns frontline maintenance experience into reusable methods:

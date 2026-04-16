@@ -2,6 +2,8 @@
 
 **中文** | [English](./README.md)
 
+![Robust LLM-Wiki Banner](./assets/github-banner-en.webp)
+
 Robust LLM-Wiki 是一个开源框架实践项目。
 
 它不是新的内容型 Wiki 仓库，而是把一线维护经验沉淀成可复用的方法：
