@@ -45,6 +45,8 @@ Robust does not mean "more features." It means "more stable maintenance mechanis
 
 ## Repository Structure
 
+![Robust LLM-Wiki Outline](./assets/outline.webp)
+
 ```text
 .
 |-- .github/
