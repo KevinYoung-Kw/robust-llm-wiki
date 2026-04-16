@@ -43,9 +43,23 @@ Robust does not mean "more features." It means "more stable maintenance mechanis
 2. Use `Schema` to define hard boundaries and safe extension space.
 3. Keep workflow implementation decoupled from this repository at the current stage.
 
-## Repository Structure
+## Read This First
+
+If you only read one file before applying this framework, start with:
+
+- [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
+
+It captures the operating mindset and non-negotiable boundaries, including:
+
+1. Preserve Karpathy kernel (`Wiki + wikilink network + ingest/query/lint` loop)
+2. Keep the three-layer architecture (`raw -> wiki -> schema`)
+3. Keep auditability, source grounding, and anonymization discipline
+
+## For Deeper Structure
 
 ![Robust LLM-Wiki Outline](./assets/outline.webp)
+
+If you want a deeper view of how this repository is organized, start from the structure below.
 
 ```text
 .
