@@ -1,95 +1,132 @@
 # Robust LLM-Wiki 总纲（SPEC）
 **中文** | [English](./SPEC.md)
 
-## 0. 这份总纲怎么用
+> 状态：稳定的架构/参考文档
+> 版本：`v0.1.1`
+> 范围：这份文档回答 Robust LLM-Wiki 是什么、必须保留什么；它不负责定义 operator workflow 细节，也不负责规定具体工具实现。
 
-1. 这份文档只写共识和边界，不写项目脚本实现。
-2. 细节写在 `schema/details/`，证据写在 `research/`。
-3. 当前阶段聚焦规范边界与执行口径，具体实现保持开放。
+## 1. 为什么需要 Robust LLM-Wiki
 
-## 1. 为什么会有这个项目
+一个长期运行的 LLM 知识库，通常不是在某个瞬间突然坏掉的。它更常见的坏法，是慢慢失真。
 
-1. 我们已经长期维护两个真实运行的 LLM-Wiki（脱敏为 A/B）。
-2. 在真实维护中，我们看到同一个问题会反复出现：结构不统一、链接断裂、内容幻觉。
-3. 其中最关键的是幻觉问题：一次修了 7 个 entity，仍要多轮 grep/read 才能稳定。
-4. 这说明 LLM-Wiki 必须坚持弱幻觉优先。
-5. 如果旧内容有幻觉，新一轮 ingest/query 可能继续引用它，错误会被继承并扩散。
+结构会漂移，链接会老化，旧幻觉会变成新引用。上周还看起来“差不多能用”的页面，会在下一次 ingest、下一次 query、下一次 synthesis 里，悄悄变成新的薄弱依赖。时间一长，问题就不再是“这一条答错了”，而是“整个知识系统已经不再可靠地维护自己”。
 
-## 2. 两个实践样本的精准统计（脱敏 A/B）
+Robust LLM-Wiki 要解决的，正是这个系统层面的问题。它把知识维护先看作一个架构问题，而不是一个临时写作问题：怎样让一个 wiki 在反复的 AI 辅助更新里，仍然保持可导航、可追溯、可修复。
 
-统计时间：2026-04-17
+## 2. 系统模型
 
-### 2.1 全仓 Markdown 统计
+这个模型故意保持简单。它只有三层和一个维护闭环。
 
-| 样本 | 定位（脱敏） | Markdown 文件数 | Markdown 行数 | `[[...]]` 双链数 | Markdown 字节数 |
-|---|---|---:|---:|---:|---:|
-| Wiki A | 生活/关系/长期事项 | 1,748 | 238,293 | 13,090 | 14,470,735 |
-| Wiki B | AI/技术学习/研究/工作流 | 1,345 | 541,083 | 4,690 | 33,034,280 |
-| 合计 | - | 3,093 | 779,376 | 17,780 | 47,505,015 |
+### 2.1 三层
 
-### 2.2 `wiki/` 目录页面结构统计
+- `raw/` 是证据层，存放原始材料，并保持不可变。
+- `wiki/` 是知识层，把原始材料转成可链接、可复用的页面。
+- `schema/` 是治理层，用来定义契约、边界与质量要求。
 
-| 样本 | wiki 页面总数 | entities | concepts | sources | synthesis | topics |
-|---|---:|---:|---:|---:|---:|---:|
-| Wiki A | 886 | 491 | 309 | 74 | 6 | 0 |
-| Wiki B | 365 | 109 | 143 | 106 | 5 | 0 |
-| 合计 | 1,251 | 600 | 452 | 180 | 11 | 0 |
+这三层最好始终分开。原始证据不应被直接重写成知识，wiki 页面也不应退化成无约束草稿区，schema 更不应沦为脚本和临时实现的堆放处。
 
-统计口径：`find` 统计 `*.md` 文件与字节；`cat|wc -l` 统计 Markdown 行数；`rg -o '\[\[[^]]+\]\]'` 统计双链。
+### 2.2 维护闭环
 
-### 2.3 来自真实样本的工程约束（已纳入 schema）
+- `ingest` 读取源材料并更新知识页面。
+- `query` 把 wiki 当作工作记忆层来检索和综合。
+- `lint` 检查结构是否仍然长期健康。
 
-1. 长文件是常态，不是例外：A/B 两个样本中，超过 10000 字符的 Markdown 都约为 `9.4%`。
-2. `log.md` 与 `index.md` 是高风险热点：两仓库最长文件都集中在日志与索引页。
-3. “文件处理过”不等于“内容读完整”：并发 + 读取上限容易造成后段遗漏。
-4. 单页质量问题会沿双链扩散：新增 entity/concept 关联时，旧误差会被 `read/grep` 带入新页。
-5. 工程噪声会渗入知识区：疑似变量未展开目录（如 `$(...)`）需要纳入 lint 观察项。
+这个闭环是系统定义的一部分，而不是实现细节。脚本、hook、模型都可以变，但这个闭环本身应保持显式存在。
 
-### 2.4 entity/concept 日增趋势（为什么后期更难维护）
+## 3. Karpathy 内核
 
-1. 两个真实样本在同一统计窗口内，出现过单日新增 `707` 页（entity+concept）。
-2. 即使后续单日新增回落，累计规模仍持续增长（样本窗口末尾累计 `1052` 页）。
-3. 这说明维护成本不仅来自“新建”，还来自“查询既有 + 补链回查 + 冲突修复”。
-4. 简化表达：`维护成本 ≈ 新增成本 + 存量成本 + grep/read 回查成本`。
-5. 详细趋势表见 [`research/2026-04-17-two-wikis-engineering-notes.zh-CN.md`](../research/2026-04-17-two-wikis-engineering-notes.zh-CN.md)。
+Robust LLM-Wiki 保留三条不可妥协的性质：
 
-## 3. Karpathy 内核红线（不可破）
+1. 它必须仍然是一个 wiki：知识以可维护页面的形式累积，而不是只停留在聊天记录里。
+2. 它必须保留双链网络：关键 entity 和 concept 应该能通过 `[[wikilink]]` 被导航、被引用、被复用。
+3. 它必须保留维护闭环：`ingest -> query -> lint`。
 
-1. 一定要是 Wiki（知识沉淀为可维护页面，不只停留在聊天记录）。
-2. 一定要有双链（可跳转、可追踪、可复用）。
-3. 一定要有维护闭环（`ingest -> query -> lint`）。
-4. 后续扩展不能破坏以上三条。
+任何扩展，只要不破坏这三点，就仍然在这个框架之内。
 
-## 4. 规范分工（先细化，再实现）
+## 4. 最小结构契约
 
-1. [`details/01-attribute-proposal.zh-CN.md`](./details/01-attribute-proposal.zh-CN.md)：先定义最小属性契约，减少写入混乱。
-2. [`details/02-ingest-field-rules.zh-CN.md`](./details/02-ingest-field-rules.zh-CN.md)：新增字段前先定义入库规则，避免后期返工（含 `draft/stable` 写入闸门倡议）。
-3. [`details/03-lint-playbook.zh-CN.md`](./details/03-lint-playbook.zh-CN.md)：按顺序做 lint，减少重复检查（含路径与 shell 安全检查）。
-4. [`details/04-hallucination-control.zh-CN.md`](./details/04-hallucination-control.zh-CN.md)：基于实战场景做弱幻觉治理。
-5. [`details/05-file2agent-context-engineering.zh-CN.md`](./details/05-file2agent-context-engineering.zh-CN.md)：长文件 ingest 的分工思路与上下文工程倡议。
-6. [`details/06-claude-hook-guidelines.zh-CN.md`](./details/06-claude-hook-guidelines.zh-CN.md)：Claude Hook 的全流程轻量守门倡议（含写后快速 lint）。
-7. [`details/07-turbo-model-value.zh-CN.md`](./details/07-turbo-model-value.zh-CN.md)：Turbo/低参数模型在双链与格式维护中的任务分工倡议。
-8. 具体实现按项目实际选择，不在本仓库固定。
+wiki 层可以演化，但稳定知识仍然需要一个最低限度的共同结构。
 
-## 5. 扩展边界（可以改，但要守边界）
+一个稳定页面至少应有这些 YAML frontmatter 字段：
 
-1. 可以在 `entity`、`concept` 外扩展 `topic` 等分类。
-2. 可以按项目需要扩展字段（如 `status`、`topic`），但要先定义 ingest 规则。
-3. 模板可用于约束属性，不建议强行约束正文大纲。
+- `id`
+- `title`
+- `type`
+- `source_ids`
+- `last_reviewed`
+- `status`
 
-## 6. 弱幻觉优先（总纲结论）
+这个契约的目的不是审美一致，而是为了让页面在规模增长之后依然可追溯、可查询、可审查。
 
-1. 模型选型优先看同口径幻觉率，不看“新旧”印象。
-2. 同口径下更新版本不一定更低幻觉率。
-3. 修复后的页面要继续做 read/grep/lint，直到冲突和断链下降到可控。
-4. 具体数据、公式和执行建议见 [`details/04-hallucination-control.zh-CN.md`](./details/04-hallucination-control.zh-CN.md)。
-5. 维护阶段可优先使用 Turbo/低参数模型处理双链和格式一致性（见 [`details/07-turbo-model-value.zh-CN.md`](./details/07-turbo-model-value.zh-CN.md)）。
+仓库还区分 `draft` 和 `stable` 两种知识状态：
 
-## 7. 文件分层
+- `draft` 用来容纳未完成、暂时性、或仍有争议的内容。
+- `stable` 用来容纳已经有来源依据、可以被后续维护安全依赖的内容。
 
-1. `schema/SPEC.md`：英文主总纲。
-2. `schema/SPEC.zh-CN.md`：中文镜像（本文件）。
-3. `schema/details/*.md`：英文详细规则和执行说明。
-4. `schema/details/*.zh-CN.md`：中文镜像详细规则。
-5. `research/RESEARCH.md`：英文研究主文档。
-6. `research/RESEARCH.zh-CN.md`：中文镜像研究文档。
+这份文档只定义这个架构层面的区分。具体的 promotion gate、verification 路径和 operator 规则，放在 [robust-llm-wiki-CLAUDE.zh-CN.md](./robust-llm-wiki-CLAUDE.zh-CN.md) 与 `schema/details/`。
+
+## 5. 弱幻觉优先
+
+弱幻觉不是一个“有更好，没有也行”的优化项，它是这个框架的一阶设计目标。
+
+一旦幻觉内容进入长期运行的 wiki，它就可能在后续 ingest 和 query 中被再次读回，并以“已有知识”的形式继续扩散。这也是为什么 Robust LLM-Wiki 更重视来源可追溯和后续可修复，而不是单次生成的速度与华丽程度。
+
+在架构层面，这意味着：
+
+- 来源约束比语言流畅更重要
+- 长期可维护比一次性写全更重要
+- 模型选型应看可比证据，而不是“新版本理应更好”的直觉
+
+## 6. 扩展边界
+
+Robust LLM-Wiki 故意允许扩展，但不是无边界扩展。
+
+- 项目可以在 `entity`、`concept` 之外增加新的页面类型。
+- 项目可以增加新字段，但这些字段必须先有明确的 ingest 含义。
+- 模板可以引导 metadata 和结构，但不应把正文写法锁死。
+
+一个扩展只有在以下条件都成立时，仍然属于这个总纲允许的范围：
+
+1. Karpathy 内核没有被破坏
+2. `raw -> wiki -> schema` 的分层仍然清晰
+3. 新字段或新类型在被当作稳定结构使用前，已经有清楚的契约定义
+
+换句话说：允许灵活，但 schema 的增长应减少未来歧义，而不是制造新的歧义。
+
+## 7. 来自实践的几个信号
+
+这份总纲确实来自长期维护实战，但顶层最重要的是把信号提炼出来，而不是把统计表直接堆到读者面前。
+
+在脱敏的真实样本里，我们反复看到这些现象：
+
+- 长文件是常态，不是例外
+- `index.md` 和 `log.md` 往往会成为操作热点
+- “处理过”并不等于“读完整”
+- 一个低质量页面会沿着双链和重复检索，把错误带到更多页面
+- 维护成本的增长，不只来自新增页面，还来自存量页面不断参与后续流程
+
+更详细的统计和案例应放在 `research/`，尤其是 `research/2026-04-17-two-wikis-engineering-notes.zh-CN.md`。
+
+## 8. 这份 SPEC 不规定什么
+
+这份文档刻意不是一本 runbook。
+
+它不规定：
+
+- 具体脚本、CLI 或 CI 怎么接
+- lint 阈值和 hook 细节怎么定
+- 必须选哪个模型供应商或版本
+- 团队级 operator ownership 的具体编排方式
+
+只要不破坏这里定义的内核、分层和弱幻觉优先，这些选择都可以按项目实际情况变化。
+
+## 9. 阅读地图
+
+推荐按这个顺序阅读仓库文档：
+
+1. `schema/SPEC.zh-CN.md`：先理解架构、边界和共享事实
+2. `schema/robust-llm-wiki-CLAUDE.zh-CN.md`：再理解 operator policy 和执行安全规则
+3. `schema/details/*.zh-CN.md`：按主题深入实现级规则
+4. `research/*`：最后查看证据、benchmark 和案例
+
+`SPEC` 负责解释这个系统是什么。`CLAUDE` 负责解释怎样安全地运行它。

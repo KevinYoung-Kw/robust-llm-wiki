@@ -1,93 +1,132 @@
 # Robust LLM-Wiki Specification (SPEC)
 [中文](./SPEC.zh-CN.md) | **English**
 
-## 0. How To Use This SPEC
+> Status: Stable architecture/reference
+> Version: `v0.1.1`
+> Scope: This file defines what Robust LLM-Wiki is and what it must preserve. It does not define operator workflow details or tool-specific runbooks.
 
-1. This document contains only shared consensus and boundaries, not project script implementations.
-2. Detailed rules are in `schema/details/`, and evidence is in `research/`.
-3. At the current stage, we focus on clear rules and boundaries, and keep implementation open.
+## 1. Why Robust LLM-Wiki Exists
 
-## 1. Why This Project Exists
+A long-running LLM knowledge base does not usually fail in one dramatic moment. It fails slowly.
 
-1. We have been maintaining two real, long-running LLM-Wikis (anonymized as A/B).
-2. In real operations, we repeatedly see the same issues: inconsistent structure, broken links, and hallucinations.
-3. The most critical issue is hallucination: even after fixing 7 entities once, we still needed multiple rounds of grep/read to stabilize.
-4. This shows that LLM-Wiki must prioritize low-hallucination operation.
-5. If older content contains hallucinations, a new ingest/query round may keep citing it, and errors will be inherited and spread.
+Structure drifts. Links decay. Old hallucinations become new citations. A page that looked "good enough" last week quietly becomes a weak dependency for the next ingest, the next query, and the next synthesis pass. Over time, the problem is no longer one wrong answer. The problem is a knowledge system that cannot reliably maintain itself.
 
-## 2. Precise Stats From Two Practice Samples (Anonymized A/B)
+Robust LLM-Wiki exists to address that system problem. It treats knowledge maintenance as an architectural problem first: how to keep a wiki navigable, source-grounded, and repairable over repeated AI-assisted update cycles.
 
-Statistics date: 2026-04-17
+## 2. The System Model
 
-### 2.1 Full-Repository Markdown Stats
+The model is intentionally simple. It has three layers and one maintenance loop.
 
-| Sample | Scope (Anonymized) | Markdown Files | Markdown Lines | `[[...]]` Wikilinks | Markdown Bytes |
-|---|---|---:|---:|---:|---:|
-| Wiki A | Life / relationships / long-term matters | 1,748 | 238,293 | 13,090 | 14,470,735 |
-| Wiki B | AI / technical learning / research / workflow | 1,345 | 541,083 | 4,690 | 33,034,280 |
-| Total | - | 3,093 | 779,376 | 17,780 | 47,505,015 |
+### 2.1 Layers
 
-### 2.2 `wiki/` Directory Page-Structure Stats
+- `raw/` is the evidence layer. It stores source material and remains immutable.
+- `wiki/` is the maintained knowledge layer. It turns source material into linked, reusable pages.
+- `schema/` is the governance layer. It defines contracts, boundaries, and quality expectations for the wiki.
 
-| Sample | Total Wiki Pages | entities | concepts | sources | synthesis | topics |
-|---|---:|---:|---:|---:|---:|---:|
-| Wiki A | 886 | 491 | 309 | 74 | 6 | 0 |
-| Wiki B | 365 | 109 | 143 | 106 | 5 | 0 |
-| Total | 1,251 | 600 | 452 | 180 | 11 | 0 |
+These layers should stay distinct. Raw evidence is not rewritten as knowledge. Wiki pages are not treated as ungoverned scratchpads. Schema is not a dumping ground for scripts or temporary implementation choices.
 
-Measurement method: `find` for `*.md` files and bytes; `cat|wc -l` for Markdown lines; `rg -o '\[\[[^]]+\]\]'` for wikilink count.
+### 2.2 Maintenance Loop
 
-### 2.3 Engineering Constraints From Real Samples (Now Incorporated Into Schema)
+- `ingest` reads source material and updates knowledge pages.
+- `query` uses the wiki as working memory for retrieval and synthesis.
+- `lint` checks whether the structure remains healthy over time.
 
-1. Long files are normal, not exceptions: in both A/B samples, Markdown files over 10,000 characters are about `9.4%`.
-2. `log.md` and `index.md` are high-risk hotspots: the longest files in both repositories are concentrated in logs and index pages.
-3. “File processed” does not equal “content fully read”: concurrency + read limits can easily miss later sections.
-4. Single-page quality issues can spread through wikilinks: when new entity/concept relations are added, old errors can be brought into new pages via `read/grep`.
-5. Engineering noise can leak into the knowledge area: suspected unexpanded variable paths (for example `$(...)`) should be included in lint observation.
+This loop is part of the system definition, not an implementation detail. Specific scripts, hooks, or models may change. The loop itself should remain explicit.
 
-### 2.4 Daily entity/concept Growth Trend (Why Maintenance Gets Harder Later)
+## 3. Karpathy Kernel
 
-1. Within the same observation window across two real samples, there was a peak day with `707` new pages (entity+concept).
-2. Even when daily additions later decline, cumulative volume continues to grow (window-end cumulative count: `1052` pages).
-3. This means maintenance cost does not come only from “new pages”; it also comes from “querying existing pages + backlinking re-check + conflict repair”.
-4. Simplified expression: `Maintenance Cost ≈ New-Creation Cost + Existing-Volume Cost + grep/read Re-check Cost`.
-5. For the detailed trend table, see `research/2026-04-17-two-wikis-engineering-notes.md`.
+Robust LLM-Wiki preserves three non-negotiable properties:
 
-## 3. Karpathy Core Red Lines (Non-Negotiable)
+1. It must remain a wiki: knowledge accumulates as maintainable pages, not only as chat transcripts or logs.
+2. It must preserve a wikilink network: key entities and concepts should remain navigable, referenceable, and reusable through `[[wikilinks]]`.
+3. It must preserve the maintenance loop: `ingest -> query -> lint`.
 
-1. It must be a Wiki (knowledge is accumulated as maintainable pages, not just chat logs).
-2. It must have wikilinks/double links (navigable, traceable, reusable).
-3. It must have a maintenance loop (`ingest -> query -> lint`).
-4. Future extensions must not break the three rules above.
+Any extension is valid only if these three properties remain intact.
 
-## 4. Division Of Spec Work (Refine First, Implement Later)
+## 4. Minimum Structural Contract
 
-1. `details/01-attribute-proposal.md`: define the minimum attribute contract first, to reduce write-time disorder.
-2. `details/02-ingest-field-rules.md`: define ingestion rules before adding new fields, to avoid later rework (including the `draft/stable` write-gate recommendation).
-3. `details/03-lint-playbook.md`: run lint in sequence, to reduce repeated checking (including path and shell safety checks).
-4. `details/04-hallucination-control.md`: low-hallucination governance based on real maintenance scenarios.
-5. `details/05-file2agent-context-engineering.md`: division-of-labor ideas for long-file ingest and context-engineering recommendations.
-6. `details/06-claude-hook-guidelines.md`: lightweight full-process guardrails with Claude Hook (including fast post-write lint).
-7. `details/07-turbo-model-value.md`: task-division recommendations for Turbo/low-parameter models in wikilink and format maintenance.
-8. implementation choices remain project-dependent and are not fixed in this repository.
+The wiki layer may evolve, but production knowledge still needs a stable minimum contract.
 
-## 5. Extension Boundaries (Flexible, But Bounded)
+A stable page should have YAML frontmatter with at least:
 
-1. You may extend beyond `entity` and `concept` with categories such as `topic`.
-2. You may extend fields by project needs (for example `status`, `topic`), but define ingest rules first.
-3. Templates may constrain attributes, but should not rigidly constrain body outlines.
+- `id`
+- `title`
+- `type`
+- `source_ids`
+- `last_reviewed`
+- `status`
 
-## 6. Low-Hallucination Priority (SPEC Conclusion)
+The purpose of this contract is not aesthetic consistency. It is to make pages traceable, queryable, and reviewable at scale.
 
-1. Model selection should prioritize same-benchmark hallucination rates, not “newer/older” impressions.
-2. On the same benchmark, a newer version is not guaranteed to have a lower hallucination rate.
-3. After a fix, continue read/grep/lint until conflicts and broken links are reduced to a controllable level.
-4. For detailed data, formulas, and execution suggestions, see `details/04-hallucination-control.md`.
-5. In the maintenance phase, you can prioritize Turbo/low-parameter models for wikilink and format consistency tasks (see `details/07-turbo-model-value.md`).
+The repository also distinguishes between `draft` and `stable` knowledge:
 
-## 7. File Layering
+- `draft` is for incomplete, provisional, or unresolved material.
+- `stable` is for material that is source-grounded and ready to be depended on by future maintenance.
 
-1. `schema/SPEC.md`: top-level specification (this file in English).
-2. `schema/details/*.md`: detailed rules and execution guidance (English primary).
-3. `research/RESEARCH.md`: evidence, samples, evaluations, and cases (English primary).
-4. `*.zh-CN.md`: Chinese mirrors for multilingual access.
+This document defines that architectural distinction. Exact promotion gates and verification workflow belong in [robust-llm-wiki-CLAUDE.md](./robust-llm-wiki-CLAUDE.md) and `schema/details/`.
+
+## 5. Low-Hallucination Priority
+
+Low hallucination is not a nice-to-have optimization. It is a first-order design goal.
+
+Once hallucinated content enters a long-running wiki, it can be read back by later ingest and query steps, then reappear as if it were grounded knowledge. That is why Robust LLM-Wiki values traceability and repairability over raw generation speed or novelty.
+
+At the architectural level, this means:
+
+- source grounding matters more than fluent prose
+- maintainability matters more than one-pass completeness
+- model choice should be judged by comparable evidence, not by "newer must be better"
+
+## 6. Extension Boundaries
+
+Robust LLM-Wiki is intentionally extensible, but not unconstrained.
+
+- Projects may add page types beyond `entity` and `concept`.
+- Projects may add fields when those fields have clear ingest-time meaning.
+- Templates may guide metadata and structure, but should not rigidly over-specify page bodies.
+
+Extensions remain inside the spec only when all of the following stay true:
+
+1. the Karpathy kernel is preserved
+2. the `raw -> wiki -> schema` layering remains clear
+3. new fields or types have defined contracts before they are treated as stable structure
+
+In other words: flexibility is welcome, but schema growth should reduce future ambiguity, not create it.
+
+## 7. Distilled Signals From Practice
+
+This spec is grounded in real maintenance work on long-running LLM wikis, but the top-level lesson is more important than the raw tables.
+
+Across anonymized practice samples, the same signals keep appearing:
+
+- long files are normal, not exceptional
+- `index.md` and `log.md` tend to become operational hotspots
+- "processed" does not necessarily mean "fully read"
+- one low-quality page can spread errors through wikilinks and repeated retrieval
+- maintenance cost grows with existing volume, not only with new page creation
+
+Detailed measurements and case evidence belong in `research/`, especially `research/2026-04-17-two-wikis-engineering-notes.md`.
+
+## 8. What This SPEC Does Not Standardize
+
+This file is deliberately not a runbook.
+
+It does not standardize:
+
+- specific scripts, CLIs, or CI wiring
+- exact lint thresholds or hook mechanics
+- model vendors or version choices
+- team-specific operational ownership beyond the architectural boundary
+
+Those choices remain project-dependent as long as they preserve the kernel, the layering, and the low-hallucination priority described here.
+
+## 9. Reading Map
+
+Use the repository docs in this order:
+
+1. `schema/SPEC.md`: architecture, boundaries, and shared reference truths
+2. `schema/robust-llm-wiki-CLAUDE.md`: operator policy and execution safety rules
+3. `schema/details/*.md`: focused rules and implementation-level guidance
+4. `research/*`: evidence, benchmarks, and case notes
+
+`SPEC` should explain the system. `CLAUDE` should explain how to run it safely.

@@ -1,193 +1,192 @@
 # robust-llm-wiki-CLAUDE
 
-## 0. Purpose
+> Status: active operator policy for release `v0.1.1`
+> Scope: this is the runbook for agents working in this repository.
+> Boundary: `SPEC.md` explains what the system is; this file explains how to run it safely.
 
-This document defines top-level operating guidance for Claude-style agents in this repository.
+## 1. What This File Is For
 
-It is a strategy and governance guide, not an implementation script spec.
+Think of `SPEC.md` as the architectural boundary and this file as the operator handbook.
 
-1. Focus on principles, ownership, and decision order.
-2. Keep tools/scripts/CI choices flexible where safety is not affected.
-3. Enforce hard constraints only when they protect correctness, traceability, safety, or legal compliance.
+`SPEC.md` says what must remain true about the system: it is still a wiki, it still uses wikilinks, and it still runs the `ingest -> query -> lint` loop.
 
-## 1. Non-Negotiable Red Lines (Mandatory / 不可妥协红线)
+This document starts one layer lower. It answers questions such as:
 
-1. Preserve Karpathy kernel exactly: Wiki form, wikilink network, and `ingest -> query -> lint` loop.
-2. Keep strict layering and boundaries:
-   - Raw sources are immutable source of truth; AI reads but does not modify them.
-   - Wiki is AI-maintained markdown knowledge where controlled updates are allowed.
-   - Schema defines governance rules and constraints.
-   - `SPEC` defines boundaries, `schema/details/` defines detailed rules, and `research/` stores evidence.
-3. Keep the three core operations explicit and always available: `ingest`, `query`, `lint`.
-4. Any extension (types, fields, workflow, tooling) is valid only if kernel invariants stay intact.
-5. Keep `index.md` as the content navigation entry and update it after ingest or major structure changes.
-6. Keep `log.md` as append-only, parseable operation history; do not rewrite history in place.
-7. Keep `[[wikilink]]` as the structural cross-reference mechanism for key entities/concepts.
-8. Keep YAML frontmatter and minimum required production fields:
-   - `id`, `title`, `type`, `source_ids`, `last_reviewed`, `status`
-9. Keep role split clear: human curates goals/sources/questions; AI executes maintenance and synthesis updates.
-10. Keep source grounding and promotion gates:
-    - factual claims must remain traceable to evidence;
-    - unsourced or unresolved claims must not enter `stable`.
-11. Enforce `draft -> stable` gate:
-    - new factual claims without `source_ids` are draft-only;
-    - promotion requires `source_ids`, one cross-check round, and passing minimum lint.
-12. Enforce independent verification:
-    - writer cannot self-approve `draft -> stable` promotion;
-    - high-risk promotions require a separate verifier (agent/model/human).
-13. Enforce legal and compliance provenance:
-    - reject unverified-license snippets and unattributed third-party material;
-    - require contributor rights attestation and third-party source/license metadata;
-    - track dependency license/version inventory;
-    - keep repo license statements consistent, with SPDX where practical.
-14. Security issues use private disclosure first; avoid public technical details before mitigation.
-15. Keep maintenance auditable, rollback-friendly, and anonymized in examples/cases.
+1. when an agent is allowed to write
+2. what must stay in `draft`
+3. how an agent team should divide work
+4. what to check before promoting content to `stable`
+5. what should be recorded so the next operator can trust the work
 
-## 2. Decision Priority
+## 2. When In Doubt, Decide In This Order
 
-When tradeoffs appear, prioritize in this order:
+Most day-to-day decisions become easier if the priority order is clear.
 
-1. factual correctness and provenance
-2. safety/legal/compliance constraints
-3. structural integrity (fields, links, naming consistency)
-4. maintainability and future rework cost
-5. style and narrative polish
+1. protect factual correctness and provenance
+2. protect safety, legal, and compliance requirements
+3. protect structural integrity: fields, links, naming, and page status
+4. protect maintainability and future rework cost
+5. polish style only after the first four are safe
 
-## 3. Operating Ownership By Loop Stage
+## 3. The Operating Posture
 
-### 3.1 Ingest
+Before talking about individual stages, it helps to keep a simple mental model in view.
 
-1. Own source assimilation and draft-page updates.
-2. Treat raw sources as input truth layer, not output artifacts.
-3. Compile into structured pages with explicit type and source trace.
-4. Handle conflicts and uncertainty explicitly, not by silent guessing.
+1. Preserve the Karpathy kernel exactly: wiki form, wikilink network, and the `ingest -> query -> lint` loop.
+2. Treat raw sources as the read-only truth layer. Agents may read them, cite them, and synthesize from them, but do not rewrite them.
+3. Treat the wiki as the maintained knowledge layer. This is where controlled AI updates are allowed.
+4. Treat schema as governance. `SPEC.md` defines the architectural boundary, this file defines operator behavior, `schema/details/` holds focused rules and playbooks, and `research/` holds evidence and case material.
+5. Keep the human/AI split legible: humans decide goals, source scope, and exception handling; agents do maintenance, synthesis, and structured checking.
+6. Prefer explicit uncertainty over silent guessing. If a claim is shaky, keep it marked, scoped, or blocked rather than smoothing it over.
+7. Keep provenance and compliance visible. Do not accept third-party material with unverifiable origin or unclear license. Require contributor rights attestation and third-party source or license metadata, keep dependency license and version inventory, keep repo license statements consistent with SPDX where practical, and route security disclosures through a private channel first.
 
-### 3.2 Query
+## 4. Run The Core Loop Deliberately
 
-1. Use wiki as working memory.
-2. Query may write answer artifacts; direct wiki mutation still follows ingest-level evidence gates.
-3. High-risk conclusions require extra verification before stable use.
+The repository stays healthy when `ingest`, `query`, and `lint` are treated as distinct jobs instead of one blurred activity.
 
-### 3.3 Lint
+### 4.1 Ingest
 
-1. Own maintenance guardrails, with layered order: `property -> link -> content`.
-2. Lint may auto-fix structural issues; semantic edits require content-owner approval.
-3. Use lint as risk control, not as a substitute for judgment.
+Ingest turns source material into draft knowledge.
 
-### 3.4 Stage Handoff Contract
+1. Ingest owns source assimilation and draft-page updates.
+2. Every factual claim written during ingest should remain traceable to evidence.
+3. New factual claims without `source_ids` stay in `draft` and do not enter `stable`.
+4. Conflicts should be carried forward explicitly as conflicts, open questions, or blocked promotions. Do not resolve them by confident wording alone.
 
-1. Each stage must emit a machine-parseable handoff:
-   - `run_id`, `files_changed`, `evidence_refs`, `open_questions`, `risk_level`, `next_owner`
-2. Next stage must validate required handoff fields before execution.
-3. Missing required handoff fields is a stop condition that triggers escalation.
+### 4.2 Query
 
-## 4. Agent Team Collaboration Rules
+Query uses the wiki as working memory, but it does not get to bypass evidence rules.
 
-1. Default rule for long/high-impact files: `1 subagent -> 1 file` end-to-end ownership.
-2. Each subagent must declare `owned_files` before edits.
-3. In one batch, overlapping write ownership is disallowed by default.
-4. If overlap is unavoidable, serialize updates with deterministic precedence and record resolution in `log.md`.
-5. Main agent orchestrates and aggregates; subagents deep-read and execute file-scoped tasks.
-6. Exceptions are allowed for short files or proven full-coverage workflows, but must be explicit.
-7. Chunk/slice files are intermediate artifacts only:
-   - never ingest chunk files as independent `src`;
-   - always merge back to original source view (`1 src -> 1 raw`).
+1. Query may produce answer artifacts or synthesis notes.
+2. Direct mutation of canonical wiki content still follows ingest-level evidence and promotion gates.
+3. High-impact conclusions drawn during query should be treated as provisional until they pass the same verification path expected of other wiki changes.
 
-## 5. Context Engineering For Scale
+### 4.3 Lint
 
-1. Assume long files are normal; "processed" does not imply "fully read."
-2. Separate responsibilities: locate first (`grep/index`), then deep-read (with chunked coverage when needed).
-3. Treat hotspot files (especially `index.md` and `log.md`) as high-frequency check targets.
-4. Favor structured intermediate summaries over raw copy-paste backfill.
-5. Minimize context waste with explicit task decomposition and stable handoff records.
+Lint is the maintenance guardrail. It keeps the system shaped correctly so content work stays trustworthy.
 
-## 6. Field And Schema Governance
+1. Run lint in layered order: `property -> link -> content`.
+2. Lint may auto-fix structural issues such as metadata shape or broken formatting.
+3. Lint should not silently make semantic decisions. Meaning-changing edits require content-owner approval or a new ingest-style review.
 
-1. Before adding any new field/type, define ingest contract first:
-   - source, normalization, default behavior, update strategy, conflict handling
-2. No schema expansion without documented and reviewable rules.
-3. Rules must be lint-checkable.
-4. Rule changes and stable-content changes must record effective date and impact scope.
-5. `type` and `status` must use approved enums; unknown values should fail ingest/lint.
-6. Define staleness policy from `last_reviewed`; stale pages should be flagged and blocked from auto-promotion.
+### 4.4 Stage Handoff
 
-## 7. Lint And Hook Execution Cadence
+Each stage should leave the next one with enough structure to continue safely.
 
-1. Mandatory lint rhythm:
-   - after each ingest/repair batch: fast `property + link`;
-   - before `draft -> stable` promotion: `content lint`;
-   - periodic broader lint still required.
-2. Keep pre/post lint snapshots for major changes to support diff and rollback.
-3. Hook trigger minimums:
-   - before read: file-size/risk reminder and decomposition hint
-   - before write: required fields/sources/wikilinks precheck
-   - after each AI write: fast minimum lint
-   - after batch/backfill: broader lint and consistency quick check
-4. If path-risk checks detect unexpanded variables or unsafe quoting/concatenation, pause batch ingest/query until fixed.
+1. Every stage emits a machine-parseable handoff with `run_id`, `files_changed`, `evidence_refs`, `open_questions`, `risk_level`, and `next_owner`.
+2. The next stage validates those fields before starting work.
+3. Missing handoff fields are a stop condition, not a soft warning.
 
-## 8. Hallucination And Risk Control
+## 5. Keep `draft` And `stable` Meaningfully Different
 
-1. Follow low-hallucination-first policy for long-running wiki maintenance.
-2. Model selection must use comparable benchmark evidence (same benchmark/scope).
-3. Evaluate hallucination rate together with answer rate; avoid single-metric decisions.
-4. Do not assume newer model version is automatically safer.
-5. Use risk classes for operations:
-   - `R1`: routine maintenance
-   - `R2`: high-risk page/update
-   - `R3`: critical conclusion/arbitration
-6. `R2/R3` require extra read/grep validation and stricter promotion checks.
-7. After factual/link repairs, repeat `read/grep/lint` until conflicts and broken links are reduced to a controllable threshold.
+One of the easiest ways to damage a wiki is to let unfinished work quietly masquerade as settled knowledge. The `draft -> stable` boundary exists to prevent that.
 
-## 9. Model Allocation Thinking
+1. Production pages should carry the minimum contract: `id`, `title`, `type`, `source_ids`, `last_reviewed`, and `status`.
+2. `type` and `status` must come from approved enums. Unknown values should fail ingest or lint.
+3. `draft` is where new, incomplete, or disputed knowledge can live while it is being worked through.
+4. `stable` is reserved for knowledge that is source-traceable, cross-checked, and structurally clean.
+5. Promotion to `stable` requires `source_ids`, at least one cross-check round, and passing minimum lint.
+6. The writer does not approve their own `draft -> stable` promotion.
+7. Stable promotion requires an independent verification pass. For `R2` and `R3` work, use a separate verifier agent, model, or human reviewer.
+8. Pages past the project staleness window should be flagged from `last_reviewed` and blocked from automatic promotion.
+
+## 6. Extend The Schema Carefully
+
+The schema should be able to grow, but growth needs a contract before it needs a field.
+
+1. Before adding a new field or page type, define its ingest contract first: source, normalization, default behavior, update strategy, and conflict handling.
+2. No schema expansion should be merged if those pieces are missing or too vague to review.
+3. New rules should be lint-checkable whenever possible.
+4. Rule changes and `stable` content changes should record an effective date and impact scope.
+
+## 7. Work As An Agent Team, Not A Swarm
+
+Agent teams help most when they reduce ambiguity, not when they multiply it.
+
+1. For long or high-impact files, default to `1 subagent -> 1 file` end-to-end ownership.
+2. Each subagent declares `owned_files` before editing.
+3. In a single batch, each target wiki file should have exactly one writer. Other agents may read, review, or prepare context, but they stay read-only for that file.
+4. If overlapping edits are unavoidable, serialize them with deterministic precedence and record the resolution in `log.md`.
+5. The main agent orchestrates, aggregates, and resolves cross-file questions. Subagents do the deep reading and file-scoped execution.
+6. Short files or proven full-coverage workflows may justify exceptions, but make those exceptions explicit.
+
+Long files need special handling because "processed" and "fully read" are not the same thing.
+
+1. Assume long files are normal, not exceptional.
+2. Treat hotspot files such as `index.md` and `log.md` as high-frequency check targets.
+3. Locate first, then deep-read. Use indexes, search, or chunking to find the relevant region before assigning deep ownership.
+4. Chunk or slice files are intermediate artifacts only. Never ingest them as independent `src`.
+5. Always merge chunked work back to the original source view: `1 src -> 1 raw`.
+
+## 8. Verify On A Rhythm, Not By Vibe
+
+Reliable maintenance comes from a repeated checking rhythm. The point is not to lint constantly; the point is to lint at the moments when bad state is most likely to enter the system.
+
+1. Before read: run a light reminder about file size, risk, and whether decomposition is needed.
+2. Before write: check required fields, source trace, and wikilink expectations.
+3. After every AI write: run fast minimum lint.
+4. After every ingest or repair batch: run fast `property + link` lint.
+5. Before `draft -> stable` promotion: run content lint.
+6. After larger backfills or batch work: run broader lint and a consistency spot-check.
+7. Keep pre- and post-lint snapshots for major changes so diffs and rollback decisions remain easy.
+8. If factual or link repairs expose more drift, repeat `read/grep/lint` until conflicts and broken links are reduced to a controllable threshold.
+9. If path-risk checks find unexpanded variables, unsafe quoting, or suspicious concatenation, pause batch ingest and query work until the script safety issue is fixed.
+
+## 9. Classify Risk Early And Escalate Cleanly
+
+Not all work deserves the same process. Risk classes help the team spend extra care where it matters.
+
+1. `R1`: routine maintenance, formatting, straightforward metadata repair, or low-impact updates
+2. `R2`: high-risk page updates, important synthesis changes, or edits that could spread through many links
+3. `R3`: critical conclusions, fact arbitration, or work that could materially change downstream interpretation
+
+Use the class to shape the workflow.
+
+1. `R2` and `R3` require extra `read/grep` validation and stricter promotion checks.
+2. Escalate to a human owner when high-impact claims lack reliable sources, conflicts persist after repeated attempts, critical schema or lint checks keep failing, or required handoff fields are missing.
+3. During escalation, freeze affected files to read-only except for the assigned resolver.
+4. Record the owner, deadline, and unblock criteria in `log.md`.
+5. Resume normal flow only after the unblock checks pass.
+
+## 10. Allocate Models By Failure Mode
+
+Model choice matters most when it changes the kind of mistake the system is likely to make.
 
 1. Use lower-hallucination paths for ingest and high-impact synthesis.
-2. Use faster/lower-cost models for repetitive maintenance (links, formatting, structural cleanup).
-3. Do not use Turbo-only flow for high-uncertainty fact arbitration or high-quality new page creation.
-4. High-risk outputs require regression pass by human or higher-capability model.
+2. Use faster or lower-cost models for repetitive maintenance such as formatting cleanup, wikilink repair, and structural consistency work.
+3. Do not run a Turbo-only path for high-uncertainty fact arbitration or high-quality new page creation.
+4. Evaluate model choices on comparable evidence. Use the same benchmark or task scope when comparing versions.
+5. Look at hallucination rate together with answer rate. A low hallucination score alone is not enough if the model stops answering useful questions.
+6. Do not assume a newer version is automatically safer.
+7. High-risk outputs should receive a regression pass from a higher-capability model or a human reviewer before they are treated as dependable.
 
-## 10. Path And Workspace Safety (Mandatory)
+## 11. Repository Conventions That Keep Work Legible
 
-1. Avoid fragile path patterns by default, especially unsafe handling of spaces/quotes.
-2. Treat suspicious path artifacts (for example unexpanded variable fragments) as risk signals.
-3. Keep knowledge area separated from temporary tooling artifacts.
-4. Path-risk findings are stop-the-line signals until script safety is repaired.
+These are not the architectural core of the system, but they make the repository easier to operate and audit.
 
-## 11. Escalation Protocol
+1. Keep `index.md` as the content navigation entry and update it after ingest or major structural changes.
+2. Keep `log.md` append-only and parseable. It is an operation history, not a scratchpad.
+3. Keep `[[wikilink]]` as the structural cross-reference mechanism for important entities and concepts.
+4. Keep temporary tooling artifacts out of the knowledge area.
+5. Keep examples and case material anonymized when the context requires it.
 
-Escalate to human owner when any of the following occurs:
+## 12. Leave An Audit Trail Others Can Trust
 
-1. high-impact claims lack reliable sources
-2. conflicts persist after repeated attempts
-3. critical schema/lint checks fail repeatedly
-4. required handoff fields are missing
+Every meaningful batch of work should make the next review easier, not harder.
 
-During escalation:
+1. Record why the change was needed.
+2. Record `files_changed`, and `owned_files` when an agent team was used.
+3. Record `evidence_refs`, unresolved conflicts, open questions, and `next_owner` when the work is not complete.
+4. Record the risk class and whether escalation is active.
+5. Record what should be checked next.
+6. Report basic coverage signals for ingest or batch work: files fully read, candidate outputs, unresolved conflict count, and broken-link delta.
+7. When rules or `stable` content change, include the effective date and impact scope.
 
-1. freeze affected files to read-only except assigned resolver
-2. record owner, deadline, and unblock criteria in `log.md`
-3. resume normal flow only after unblock checks pass
+## 13. What Stays Flexible
 
-## 12. What Is Intentionally Left Flexible
+This policy is intentionally strict about correctness and traceability, but it leaves room for local engineering choices.
 
-The following remain project-dependent:
-
-1. exact scripts, commands, and CI wiring
-2. lint threshold values and alert levels
-3. model vendor/version choices under this policy
-4. folder-level mechanics beyond core boundaries
-
-## 13. Minimum Output Contract For AI Changes
-
-For each meaningful change batch, provide:
-
-1. why the change was needed
-2. what was changed (`files_changed`, and `owned_files` when agent team is used)
-3. evidence references and unresolved conflicts/open questions
-4. risk class (`R1/R2/R3`) and whether escalation is active
-5. what should be checked next
-6. ingest/batch coverage metrics:
-   - files fully read
-   - candidate outputs
-   - unresolved conflict count
-   - broken-link delta
-7. when rules/stable content are changed, include effective date and impact scope
+1. Exact scripts, commands, and CI wiring remain project-dependent.
+2. Lint thresholds and alert levels may evolve with repository scale.
+3. Model vendor and version choices remain flexible as long as they respect the operating policy above.
+4. Folder-level mechanics beyond the core system boundary can change without rewriting the core policy.

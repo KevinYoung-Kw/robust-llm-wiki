@@ -13,13 +13,13 @@ It is not a new content Wiki repository. It distills real maintenance experience
 
 > [!IMPORTANT]
 > **Read This First**
-> If you only read one file before applying this framework, start with:
-> **[`schema/robust-llm-wiki-CLAUDE.md`](./schema/robust-llm-wiki-CLAUDE.md)**
+> If you want the best entry into the schema docs, start with:
+> **[`schema/README.md`](./schema/README.md)**
 >
-> This document defines the operating mindset and hard constraints, including:
-> - Karpathy kernel (`Wiki + wikilink network + ingest/query/lint` loop)
-> - Agent-team collaboration rules (including `1 subagent -> 1 file` for long/high-impact files)
-> - `draft -> stable` promotion gates, verification, lint/hook cadence, and escalation protocol
+> It gives you the reading order first, then points you to:
+> - `SPEC.md` for architecture and boundaries
+> - `robust-llm-wiki-CLAUDE.md` for operator policy and agent-team rules
+> - `details/` for focused playbooks and rule pages
 
 ## At A Glance
 
@@ -83,6 +83,8 @@ Purpose: define red lines, operating rules, extension boundaries, and governance
 
 - Main spec (EN): [schema/SPEC.md](./schema/SPEC.md)
 - Main spec (ZH): [schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md)
+- Schema start-here guide (EN): [schema/README.md](./schema/README.md)
+- Schema start-here guide (ZH): [schema/README.zh-CN.md](./schema/README.zh-CN.md)
 - Claude operating guidance: [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
 - Detailed rules: [schema/details/](./schema/details)
 - Open-source policy (EN): [schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
@@ -90,8 +92,8 @@ Purpose: define red lines, operating rules, extension boundaries, and governance
 
 ## Quick Start
 
-1. Read [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
-2. Read [schema/SPEC.md](./schema/SPEC.md), then the relevant files in [schema/details/](./schema/details).
+1. Read [schema/README.md](./schema/README.md).
+2. Follow it into [schema/SPEC.md](./schema/SPEC.md) and [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
 3. Use [research/RESEARCH.md](./research/RESEARCH.md) and snapshots as evidence anchors when adapting this framework.
 
 ## Karpathy Kernel (Do Not Drift)

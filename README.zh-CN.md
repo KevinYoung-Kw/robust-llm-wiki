@@ -13,13 +13,13 @@ Robust LLM-Wiki 是一个面向 AI 长期维护场景的开源 Wiki 框架实践
 
 > [!IMPORTANT]
 > **先读这里（Read This First）**
-> 如果在落地这个框架前你只读一个文件，请先读：
-> **[`schema/robust-llm-wiki-CLAUDE.md`](./schema/robust-llm-wiki-CLAUDE.md)**
+> 如果你想用最顺的路径进入 schema 文档，请先读：
+> **[`schema/README.zh-CN.md`](./schema/README.zh-CN.md)**
 >
-> 这个文件是顶层操作指南，包含：
-> - Karpathy 内核（`Wiki + 双链网络 + ingest/query/lint` 闭环）
-> - Agent Team 协作规则（含长/高风险文件默认 `1 subagent -> 1 file`）
-> - `draft -> stable` 提升门禁、验证机制、lint/hook 节奏与升级协议
+> 它会先给你阅读顺序，再把你带到：
+> - `SPEC`：理解架构与边界
+> - `robust-llm-wiki-CLAUDE.zh-CN`：理解 operator policy 与 agent 协作规则
+> - `details/`：按主题深入具体规则页
 
 ## 项目速览
 
@@ -83,15 +83,18 @@ Robust 不是“功能更多”，而是“维护机制更稳”。
 
 - 规范主文档（EN）：[schema/SPEC.md](./schema/SPEC.md)
 - 规范主文档（ZH）：[schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md)
-- Claude 顶层操作文档：[schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
+- Schema 入口页（EN）：[schema/README.md](./schema/README.md)
+- Schema 入口页（ZH）：[schema/README.zh-CN.md](./schema/README.zh-CN.md)
+- Claude 顶层操作文档（EN）：[schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
+- Claude 顶层操作文档（ZH）：[schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)
 - 详细规则目录：[schema/details/](./schema/details)
 - 开源治理（EN）：[schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
 - 开源治理（ZH）：[schema/OPEN_SOURCE_POLICY.zh-CN.md](./schema/OPEN_SOURCE_POLICY.zh-CN.md)
 
 ## 快速开始
 
-1. 先读 [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)。
-2. 再读 [schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md)，然后按需进入 [schema/details/](./schema/details)。
+1. 先读 [schema/README.zh-CN.md](./schema/README.zh-CN.md)。
+2. 按其中的顺序进入 [schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md) 和 [schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)。
 3. 在落地时用 [research/RESEARCH.zh-CN.md](./research/RESEARCH.zh-CN.md) 和快照作为证据锚点。
 
 ## Karpathy 内核（不偏离）
