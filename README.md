@@ -4,100 +4,102 @@
 
 ![Robust LLM-Wiki Banner](./assets/github-banner-en.webp)
 
-Robust LLM-Wiki is an open-source practice framework.
+Robust LLM-Wiki is an open-source framework for long-term, low-drift Wiki maintenance with AI.
 
-It is not a new content Wiki repository. Instead, it turns frontline maintenance experience into reusable methods:
+It is not a new content Wiki repository. It distills real maintenance experience into reusable methods:
 
-1. `Research` (evidence and problems)
-2. `Schema` (red lines and execution rules)
+1. `Research` (evidence and recurring problems)
+2. `Schema` (non-negotiable boundaries and operating rules)
+
+> [!IMPORTANT]
+> **Read This First**
+> If you only read one file before applying this framework, start with:
+> **[`schema/robust-llm-wiki-CLAUDE.md`](./schema/robust-llm-wiki-CLAUDE.md)**
+>
+> This document defines the operating mindset and hard constraints, including:
+> - Karpathy kernel (`Wiki + wikilink network + ingest/query/lint` loop)
+> - Agent-team collaboration rules (including `1 subagent -> 1 file` for long/high-impact files)
+> - `draft -> stable` promotion gates, verification, lint/hook cadence, and escalation protocol
+
+## At A Glance
+
+| Item | Value |
+|---|---|
+| Snapshot date | `2026-04-17` |
+| Practice samples | Two anonymized production Wikis (A/B) |
+| Markdown files | `3,093` |
+| Markdown lines | `779,376` |
+| Wikilinks (`[[...]]`) | `17,780` |
+
+At this scale, the hard part is not writing pages. The hard part is keeping quality stable over time.
 
 ## Why This Project Exists
 
-This project was proposed after long-term maintenance of two real, production LLM-Wikis, where recurring issues appeared over time.
+We observed recurring failure patterns during long-term maintenance of two real LLM-Wikis:
 
-The two Wikis are anonymized as A/B and focus on:
+1. Human-read and AI-read goals become mixed, so pages are either hard to read or hard to process.
+2. Overuse of rigid outlines drifts away from the Wiki form.
+3. Sources are appended at the tail while body-level wikilinks stay weak, creating isolated pages.
+4. Rules and checks are not layered, so maintenance cost rises quickly with volume.
 
-1. life/relationship information and long-term ongoing items
-2. AI/technical learning, research, and workflow accumulation
+## Core Idea
 
-As of 2026-04-17, combined scale reached:
+Robust does not mean “more features.” It means “more stable maintenance mechanisms.”
 
-1. `3,093` Markdown files
-2. `779,376` lines of Markdown text
-3. `17,780` double-links (`[[...]]`)
-
-At this scale, the hard part is not writing content. The hard part is maintaining it stably over time.
-
-## Problems We Observed
-
-1. Human-read and AI-read goals are mixed, so pages become either hard to read or hard to process.
-2. Overuse of outline templates makes pages rigid and drifts away from the Wiki form.
-3. Sources are often appended at the end, while body double-links are weak, and pages become isolated islands.
-4. Rules and checks are not layered, so maintenance cost rises quickly with scale.
-
-## Core Idea of Robust LLM-Wiki
-
-Robust does not mean "more features." It means "more stable maintenance mechanisms."
-
-1. Keep Karpathy's kernel unchanged: Wiki form, double-link network, and the ingest/query/lint loop.
+1. Keep Karpathy kernel unchanged.
 2. Use `Schema` to define hard boundaries and safe extension space.
-3. Keep workflow implementation decoupled from this repository at the current stage.
+3. Keep implementation choices decoupled from this framework repository.
 
-## Read This First
-
-If you only read one file before applying this framework, start with:
-
-- [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
-
-It captures the operating mindset and non-negotiable boundaries, including:
-
-1. Preserve Karpathy kernel (`Wiki + wikilink network + ingest/query/lint` loop)
-2. Keep the three-layer architecture (`raw -> wiki -> schema`)
-3. Keep auditability, source grounding, and anonymization discipline
-
-## For Deeper Structure
+## Repository Map
 
 ![Robust LLM-Wiki Outline](./assets/outline.webp)
 
-If you want a deeper view of how this repository is organized, start from the structure below.
-
 ```text
 .
-|-- .github/
-|-- CONTRIBUTING.md
-|-- CONTRIBUTING.zh-CN.md
-|-- I18N.md
-|-- I18N.zh-CN.md
-|-- README.md
-|-- README.zh-CN.md
-|-- research/
-`-- schema/
+├── .github/
+├── CONTRIBUTING.md
+├── CONTRIBUTING.zh-CN.md
+├── I18N.md
+├── I18N.zh-CN.md
+├── README.md
+├── README.zh-CN.md
+├── research/
+└── schema/
 ```
 
 ### 1) Research
 
 Purpose: preserve evidence, dataset scale, ecosystem observations, and problem summaries.
 
-- Main doc: [research/RESEARCH.md](./research/RESEARCH.md)
+- Main doc (EN): [research/RESEARCH.md](./research/RESEARCH.md)
+- Main doc (ZH): [research/RESEARCH.zh-CN.md](./research/RESEARCH.zh-CN.md)
 - Survey snapshots: `research/snapshots/`
-- Engineering notes (anonymized A/B): [research/2026-04-17-two-wikis-engineering-notes.md](./research/2026-04-17-two-wikis-engineering-notes.md)
+- Engineering notes (A/B anonymized): [research/2026-04-17-two-wikis-engineering-notes.md](./research/2026-04-17-two-wikis-engineering-notes.md)
 - Ecosystem survey: [research/2026-04-17-llm-wiki-ecosystem-survey.md](./research/2026-04-17-llm-wiki-ecosystem-survey.md)
 
 ### 2) Schema
 
-Purpose: define red lines, rules, extension boundaries, and open-source governance requirements.
+Purpose: define red lines, operating rules, extension boundaries, and governance requirements.
 
-- Main spec: [schema/SPEC.md](./schema/SPEC.md)
+- Main spec (EN): [schema/SPEC.md](./schema/SPEC.md)
+- Main spec (ZH): [schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md)
+- Claude operating guidance: [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
 - Detailed rules: [schema/details/](./schema/details)
-- New practice entry: [schema/details/07-turbo-model-value.md](./schema/details/07-turbo-model-value.md)
-- Licensing/governance policy: [schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
+- Open-source policy (EN): [schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
+- Open-source policy (ZH): [schema/OPEN_SOURCE_POLICY.zh-CN.md](./schema/OPEN_SOURCE_POLICY.zh-CN.md)
+
+## Quick Start
+
+1. Read [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
+2. Read [schema/SPEC.md](./schema/SPEC.md), then the relevant files in [schema/details/](./schema/details).
+3. Use [research/RESEARCH.md](./research/RESEARCH.md) and snapshots as evidence anchors when adapting this framework.
 
 ## Karpathy Kernel (Do Not Drift)
 
-1. It must be a Wiki (knowledge is maintained as durable pages, not chat logs)
-2. It must have double-links (navigable, discoverable, reusable)
-3. It must keep the ingest/query/lint closed loop
-4. It must remain traceable, auditable, and rollback-friendly
+1. It must be a Wiki.
+2. It must have wikilinks/double-links.
+3. It must keep the `ingest -> query -> lint` loop.
+4. It must remain traceable, auditable, and rollback-friendly.
 
 ## Open-Source Licensing (Recommended)
 
@@ -117,4 +119,4 @@ Detailed policy: [schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
 
 ## Baseline Source
 
-- Karpathy original gist: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+- Karpathy original gist: [https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)
