@@ -13,6 +13,10 @@ Structure drifts. Links decay. Old hallucinations become new citations. A page t
 
 Robust LLM-Wiki exists to address that system problem. It treats knowledge maintenance as an architectural problem first: how to keep a wiki navigable, source-grounded, and repairable over repeated AI-assisted update cycles.
 
+It also takes a document-centered direction. Pages, addresses, links, logs, and reviewable history are treated as system primitives, not as secondary artifacts around a tool. The goal is not only to add more content, but to improve the maintenance process itself as the wiki grows.
+
+That direction is intentionally closer to the document-centered line associated with Engelbart's OHS/CODIAK work than to a prompt-only workflow. In this framework, addressable pages and their links are the durable operating unit.
+
 ## 2. The System Model
 
 The model is intentionally simple. It has three layers and one maintenance loop.
@@ -32,6 +36,21 @@ These layers should stay distinct. Raw evidence is not rewritten as knowledge. W
 - `lint` checks whether the structure remains healthy over time.
 
 This loop is part of the system definition, not an implementation detail. Specific scripts, hooks, or models may change. The loop itself should remain explicit.
+
+### 2.3 Control Plane And Data Plane
+
+This framework repository mainly publishes the control-plane of an LLM-Wiki system:
+
+- `research/` records evidence, scale, and recurring failure patterns.
+- `schema/` records architecture, runtime constraints, and governance rules.
+
+A downstream implementation is expected to supply the data-plane:
+
+- `raw/` source material,
+- `wiki/` maintained pages,
+- `index.md` and `log.md` as operating artifacts.
+
+This separation is intentional. It keeps the public framework reusable without requiring the repository itself to publish a live private wiki.
 
 ## 3. Karpathy Kernel
 

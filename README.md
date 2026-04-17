@@ -9,12 +9,11 @@
 
 ![Robust LLM-Wiki Banner](./assets/github-banner-en.webp)
 
-Robust LLM-Wiki is an open-source framework for long-term, low-drift Wiki maintenance with AI.
+Robust LLM-Wiki is a document-centered control-plane for long-term Wiki maintenance with AI.
 
-This repository is for methodology, not for publishing private wiki content. We ran two real LLM-Wikis over a long period, encountered recurring operational issues, and extracted the reusable parts into a transferable framework:
+This repository does not publish a private wiki. It publishes the framework for keeping one stable over time: how to preserve Wiki form, keep wikilinks healthy, control agent runtime drift, and make maintenance auditable as the corpus grows.
 
-1. `Research` (evidence and recurring problems)
-2. `Schema` (non-negotiable boundaries and operating rules)
+The project was extracted from two long-running real LLM-Wikis. The goal is not one-shot generation. The goal is repeatable maintenance.
 
 > [!IMPORTANT]
 > **Read This First**
@@ -25,6 +24,17 @@ This repository is for methodology, not for publishing private wiki content. We 
 > - `SPEC.md` for architecture and boundaries
 > - `robust-llm-wiki-CLAUDE.md` for operator policy and agent-team rules
 > - `details/` for focused playbooks and rule pages
+
+## What Problem This Solves
+
+Once an LLM-Wiki becomes large enough, the main problem is no longer \"can the model write a page.\" The problem becomes:
+
+1. can the wiki stay navigable,
+2. can new sources be compiled without polluting old pages,
+3. can query results be trusted enough to feed later maintenance,
+4. can the agent runtime stop drifting as tool chains get longer.
+
+This repository exists to answer those questions with reusable rules rather than one-off prompts.
 
 ## At A Glance
 
@@ -38,14 +48,44 @@ This repository is for methodology, not for publishing private wiki content. We 
 
 At this scale, the core challenge is sustaining maintenance quality over time, not just finishing one-time page creation.
 
-## Why This Project Exists
+## Why This Repository Exists
 
-The motivation is straightforward: long-running operation of two real LLM-Wikis exposed the same classes of failure repeatedly, so we turned the repair patterns into reusable guidance. This repository publishes methods, rules, and validation structure, not the private contents of those Wikis:
+The motivation is straightforward: long-running operation of two real LLM-Wikis exposed the same classes of failure repeatedly, so the repair patterns were turned into reusable guidance. This repository publishes methods, rules, and validation structure, not the private contents of those Wikis:
 
 1. Human-read and AI-read goals become mixed, so pages are either hard to read or hard to process.
 2. Overuse of rigid outlines drifts away from the Wiki form.
 3. Sources are appended at the tail while body-level wikilinks stay weak, creating isolated pages.
 4. Rules and checks are not layered, so maintenance cost rises quickly with volume.
+
+## Document-Centered Direction
+
+The design direction is document-centered rather than tool-centered.
+
+In practical terms, that means:
+
+1. pages are the long-lived unit, not chat transcripts,
+2. addresses, links, and logs matter as much as generated prose,
+3. the system should improve its maintenance process, not only add more content.
+
+This is also the historical direction that makes the project legible: closer to Engelbart's document-centered OHS/CODIAK line than to a prompt-only workflow. The durable unit is the addressable page and its links, not the transient tool session.
+
+That is why this repository behaves more like a control-plane than a content repository.
+
+## Control Plane vs Data Plane
+
+This repository intentionally publishes the control-plane:
+
+1. `research/` for evidence, scale, and recurring failure patterns,
+2. `schema/` for architectural boundaries and operating rules,
+3. runbooks for how agents should ingest, query, lint, hand off, and promote knowledge.
+
+Downstream implementations are expected to provide the data-plane:
+
+1. `raw/` source material,
+2. `wiki/` maintained knowledge pages,
+3. `index.md` and `log.md` as first-class operating files.
+
+This split is deliberate. It keeps the framework reusable while letting each real Wiki keep its own private corpus.
 
 ## Core Idea
 
@@ -53,7 +93,33 @@ Robust focuses on maintaining stability in operations and governance.
 
 1. Keep Karpathy kernel unchanged.
 2. Use `Schema` to define hard boundaries and safe extension space.
-3. Keep implementation choices decoupled from this framework repository.
+3. Treat runtime safety as architecture, not as an afterthought.
+4. Improve the maintenance method itself as the corpus grows.
+5. Keep implementation choices decoupled from this framework repository.
+
+## A Minimal Maintenance Cycle
+
+The intended cycle is simple:
+
+1. ingest one source into draft knowledge,
+2. update the linked entity, concept, or synthesis pages it touches,
+3. refresh `index.md` and append to `log.md`,
+4. run lint in layers,
+5. promote only after evidence and structure checks pass.
+
+The repository does not ship one fixed implementation of that loop. It defines the contract that a downstream implementation should satisfy.
+
+## Why This Is More Than Schema
+
+The point of the framework is not \"more files.\" The point is to make long-term Wiki maintenance legible.
+
+The repository already anchors that claim in three ways:
+
+1. real operating scale from two anonymized production Wikis,
+2. evidence and engineering notes in `research/`,
+3. explicit runtime and promotion rules in `schema/`.
+
+What it publishes is the control logic. What downstream Wikis provide is the live corpus.
 
 ## Repository Map
 
