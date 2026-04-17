@@ -53,22 +53,19 @@
 
 主口径：Vectara Hallucination Leaderboard（最后更新 2026-03-20；截至 2026-04-17 暂无更近更新）。
 
-| 厂商 | 模型条目 | Hallucination Rate | Factual Consistency |
-|---|---|---:|---:|
-| DeepSeek | deepseek-ai/DeepSeek-V3.2-Exp | 5.3% | 94.7% |
-| OpenAI | openai/gpt-5.4-nano-2026-03-17 | 3.1% | 96.9% |
-| OpenAI | openai/gpt-5.4-mini-2026-03-17 | 5.5% | 94.5% |
-| MiniMax | MiniMaxAI/minimax-m2p5 | 9.1% | 90.9% |
-| GLM | zai-org/GLM-4.7-flash | 9.3% | 90.7% |
-| GLM | zai-org/glm-5 | 10.1% | 89.9% |
-| Claude | anthropic/claude-haiku-4-5-20251001 | 9.8% | 90.2% |
-| Claude | anthropic/claude-sonnet-4-6 | 10.6% | 89.4% |
-| Kimi | moonshotai/Kimi-K2.5 | 14.2% | 85.8% |
-| Kimi | moonshotai/Kimi-K2-Instruct-0905 | 17.9% | 82.1% |
+本仓库不在研究页内复述具体厂商、具体模型、具体分数，也不对模型能力做公开评价。
 
-补充：
-1. Codex 在部分评测页有排名条目（如 AA-Omniscience 实时页），但静态页面未直接提供统一可引用的幻觉率数值。
-2. 同口径下“更新版本”不一定“更低幻觉率”，选型仍应以同榜单实测为准。
+如需查看同口径的公开数据，请直接参考原始链接：
+
+1. Vectara Hallucination Leaderboard: https://github.com/vectara/hallucination-leaderboard
+2. AA-Omniscience 实时页: https://artificialanalysis.ai/evaluations/omniscience
+3. SimpleQA: https://arxiv.org/abs/2411.04368
+4. AA-Omniscience: https://arxiv.org/abs/2511.13029
+
+补充说明：
+1. 不同榜单定义不同，不能直接做绝对值横比。
+2. 同口径下的更新版本也不一定更低幻觉。
+3. 如需比较，请以原始发布页面和原始方法说明为准。
 
 ## 口径限制（必须同时阅读）
 
@@ -125,3 +122,7 @@ H_{t+1}=\alpha H_t + \lambda k_t h_m - \beta u_t
 5. AA-Omniscience: https://arxiv.org/abs/2511.13029
 6. 生态快照与原始数据：`research/snapshots/`
 7. 两个真实仓库工程观察：[`research/2026-04-17-two-wikis-engineering-notes.zh-CN.md`](./2026-04-17-two-wikis-engineering-notes.zh-CN.md)
+
+说明：
+1. 本仓库在引用这些资料时，只提供研究入口与方法来源。
+2. 相关页面不代表本仓库对任何模型厂商、模型家族或产品能力作公开判断。

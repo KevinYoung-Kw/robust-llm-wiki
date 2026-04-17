@@ -7,7 +7,7 @@
 > `SPEC.md` explains the architecture and boundaries. `robust-llm-wiki-CLAUDE.md` explains how agents should operate inside those boundaries.
 
 > [!TIP]
-> Current released schema baseline: `v0.1.2`
+> Current released schema baseline: `v0.1.3`
 
 The `schema/` folder answers a practical question: how should a long-running LLM-Wiki be structured, maintained, and governed so that it stays useful over time?
 
@@ -35,6 +35,7 @@ If you only want the shortest correct path:
 1. [robust-llm-wiki-CLAUDE.md](./robust-llm-wiki-CLAUDE.md)
 2. [details/03-lint-playbook.md](./details/03-lint-playbook.md)
 3. [details/06-claude-hook-guidelines.md](./details/06-claude-hook-guidelines.md)
+4. [details/08-harmless-engineering.md](./details/08-harmless-engineering.md)
 
 ### I Need To Define Or Extend Fields
 
@@ -52,11 +53,13 @@ If you only want the shortest correct path:
 
 1. [robust-llm-wiki-CLAUDE.md](./robust-llm-wiki-CLAUDE.md)
 2. [details/05-file2agent-context-engineering.md](./details/05-file2agent-context-engineering.md)
+3. [details/08-harmless-engineering.md](./details/08-harmless-engineering.md)
 
 ### I Need Hallucination And Model Guidance
 
 1. [details/04-hallucination-control.md](./details/04-hallucination-control.md)
 2. [details/07-turbo-model-value.md](./details/07-turbo-model-value.md)
+3. [details/08-harmless-engineering.md](./details/08-harmless-engineering.md)
 
 ### I Need Legal Or Open-Source Policy
 
@@ -82,6 +85,7 @@ If you only want the shortest correct path:
 | [details/05-file2agent-context-engineering.md](./details/05-file2agent-context-engineering.md) | Long-file reading, context limits, and `1 subagent -> 1 file` style workflows |
 | [details/06-claude-hook-guidelines.md](./details/06-claude-hook-guidelines.md) | Hook trigger recommendations and lightweight guardrails |
 | [details/07-turbo-model-value.md](./details/07-turbo-model-value.md) | Where faster or lower-cost models help, and where they should not lead |
+| [details/08-harmless-engineering.md](./details/08-harmless-engineering.md) | Low-damage long-horizon agent behavior, observability, and model/runtime choice |
 
 ## Reading Principle
 

@@ -7,6 +7,14 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-04-17
+
+### Changed
+
+- Continued the schema and research refinement work across the current draft set, including updates to the bilingual schema docs and detail pages.
+- Tightened the public `research/RESEARCH.md` and `research/RESEARCH.zh-CN.md` benchmark section so the repository now links to original public evaluation sources instead of restating vendor/model score tables.
+- Updated schema-facing version markers so the released schema baseline is now tracked as `v0.1.3`.
+
 ## [0.1.2] - 2026-04-17
 
 ### Added
@@ -49,7 +57,8 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 - Workflow implementation content is intentionally deferred and will be introduced in a future version.
 
-[Unreleased]: https://github.com/KevinYoung-Kw/robust-llm-wiki/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/KevinYoung-Kw/robust-llm-wiki/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/KevinYoung-Kw/robust-llm-wiki/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/KevinYoung-Kw/robust-llm-wiki/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/KevinYoung-Kw/robust-llm-wiki/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/KevinYoung-Kw/robust-llm-wiki/releases/tag/v0.1.0

@@ -54,22 +54,19 @@ Measurement method: `find` for `*.md` file count and bytes; `find -print0 | xarg
 
 Primary benchmark: Vectara Hallucination Leaderboard (last updated 2026-03-20; no newer public update as of 2026-04-17).
 
-| Vendor | Model Entry | Hallucination Rate | Factual Consistency |
-|---|---|---:|---:|
-| DeepSeek | deepseek-ai/DeepSeek-V3.2-Exp | 5.3% | 94.7% |
-| OpenAI | openai/gpt-5.4-nano-2026-03-17 | 3.1% | 96.9% |
-| OpenAI | openai/gpt-5.4-mini-2026-03-17 | 5.5% | 94.5% |
-| MiniMax | MiniMaxAI/minimax-m2p5 | 9.1% | 90.9% |
-| GLM | zai-org/GLM-4.7-flash | 9.3% | 90.7% |
-| GLM | zai-org/glm-5 | 10.1% | 89.9% |
-| Claude | anthropic/claude-haiku-4-5-20251001 | 9.8% | 90.2% |
-| Claude | anthropic/claude-sonnet-4-6 | 10.6% | 89.4% |
-| Kimi | moonshotai/Kimi-K2.5 | 14.2% | 85.8% |
-| Kimi | moonshotai/Kimi-K2-Instruct-0905 | 17.9% | 82.1% |
+This repository does not restate vendor-by-vendor model tables or publish its own public ranking here.
+
+If you want same-benchmark public data, go directly to the original sources:
+
+1. Vectara Hallucination Leaderboard: https://github.com/vectara/hallucination-leaderboard
+2. AA-Omniscience live page: https://artificialanalysis.ai/evaluations/omniscience
+3. SimpleQA: https://arxiv.org/abs/2411.04368
+4. AA-Omniscience: https://arxiv.org/abs/2511.13029
 
 Additional notes:
-1. Codex appears on some evaluation pages (for example AA-Omniscience live), but static pages do not provide one unified citable hallucination-rate number.
-2. Under the same benchmark, a newer version is not guaranteed to be lower-hallucination. Selection should still follow measured same-board results.
+1. Different leaderboards use different definitions, so absolute values should not be compared directly.
+2. A newer version under the same benchmark is not guaranteed to be lower-hallucination.
+3. For any comparison, consult the original release pages and methodology directly.
 
 ## Benchmark-Scope Limits (Must Read Together)
 
@@ -126,3 +123,7 @@ Conclusion: even after focused fixes on multiple entities, multiple `read/grep` 
 5. AA-Omniscience: https://arxiv.org/abs/2511.13029
 6. Ecosystem snapshots and raw data: `research/snapshots/`
 7. Engineering notes from two real repositories: [`research/2026-04-17-two-wikis-engineering-notes.md`](./2026-04-17-two-wikis-engineering-notes.md)
+
+Note:
+1. These references are provided as research entry points and methodology sources only.
+2. They should not be read as this repository making a public judgment about any model vendor, family, or product capability.

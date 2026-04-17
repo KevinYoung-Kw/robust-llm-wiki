@@ -7,7 +7,7 @@
 
 来自原始 gist 的核心共识：
 
-1. 不是“每次提问都重算”的 RAG，而是“持续编译”的持久 wiki。
+1. 与其说是“每次提问都重算”的 RAG，不如说是“持续编译”的持久 wiki。
 2. 三层架构：`raw sources`（只读真值）/ `wiki`（LLM 维护）/ `schema`（规则与流程）。
 3. 三个操作闭环：`ingest` / `query` / `lint`。
 4. `index.md` 和 `log.md` 是最低成本导航层。

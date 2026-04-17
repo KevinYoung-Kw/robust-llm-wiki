@@ -9,7 +9,7 @@
 
 ## 路径 A：你已经有自己的 LLM-Wiki
 
-如果你已经在维护自己的 wiki，目标不是把这个仓库整套照搬过去，而是让 agent 先吃透 [schema/robust-llm-wiki-CLAUDE.md](../schema/robust-llm-wiki-CLAUDE.md) 里的运行规则，再按你现有实现做选择性吸收。
+如果你已经在维护自己的 wiki，目标不在于把这个仓库整套照搬过去；更关键的是让 agent 先吃透 [schema/robust-llm-wiki-CLAUDE.md](../schema/robust-llm-wiki-CLAUDE.md) 里的运行规则，再按你现有实现做选择性吸收。
 
 更推荐的流程是：
 
@@ -31,7 +31,7 @@ Instead:
 4. draft an agent operating file for my repo that preserves my current architecture where possible.
 ```
 
-在这条路径下，最好的结果通常不是“照抄他们的文件”，而是“把 robust 的运行经验翻译成我自己仓库的语言、目录和约束”。
+在这条路径下，最好的结果通常不是“照抄他们的文件”；更好的做法是“把 robust 的运行经验翻译成我自己仓库的语言、目录和约束”。
 
 ## 路径 B：你还没有 LLM-Wiki
 

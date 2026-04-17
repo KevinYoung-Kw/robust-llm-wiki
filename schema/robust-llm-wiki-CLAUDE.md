@@ -1,6 +1,6 @@
 # robust-llm-wiki-CLAUDE
 
-> Status: active operator policy for release `v0.1.2`
+> Status: active operator policy for release `v0.1.3`
 > Scope: this is the runbook for agents working in this repository.
 > Boundary: `SPEC.md` explains what the system is; this file explains how to run it safely.
 

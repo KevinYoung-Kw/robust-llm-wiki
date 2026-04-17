@@ -22,6 +22,20 @@ That failure mode is common when long files meet read limits, concurrent process
 
 So the core problem here is not merely token budget. The deeper problem is coverage illusion: the system appears complete before the source has actually been understood.
 
+### Practical Read Ceiling And Default
+
+In practice, a single `read` call is often capped to about `~10,000` characters per fetch (tool/runtime dependent). If one read cannot comfortably cover the full file, default to:
+
+`1 subagent -> 1 raw file`
+
+Do not assume a second or third read will always happen automatically under concurrency pressure.
+
+### Origin Note (Personal Experience, Anonymized)
+
+This rule was refined from personal maintenance experience during a direct import of a personal knowledge-base style corpus. Many files were marked as processed, but later validation showed heavy omissions because large pages were never fully read.
+
+This note is retained as anonymized process history. The original wiki content remains private and is not published in this repository.
+
 ## The Rule: One Subagent Owns One File
 
 If a single `raw` file cannot be comfortably covered in one focused pass, assign one subagent to that file end to end.
@@ -54,6 +68,14 @@ When one file has one clear owner, it becomes easier to ask: was this source ful
 ### 4. It scales better under concurrency
 
 Parallelism is helpful only when ownership is clear. Without ownership, concurrent ingest can create duplication, omission, or contradictory partial reads.
+
+### 5. It matches real ingest behavior
+
+Maintainer feedback highlighted three recurring operational patterns:
+
+1. In concurrent multi-file ingest, agents may call `read` only once per file. Some continue reading, some stop early, so tail sections are silently omitted.
+2. A subagent has independent context and can schedule deeper single-file reading without competing against repo-wide merge tasks in the same working memory.
+3. After a subagent completes reading, entity and concept candidates can return to the main agent for append and merge. If one agent both ingests and performs cross-page `read` or `grep` for new entities, context can grow too fast and quality drops.
 
 ## Context Engineering: What The Main Agent Should Do
 
@@ -106,6 +128,28 @@ For most larger ingest tasks, the default collaboration pattern should be:
 5. the repo runs lint before those pages move toward `stable`.
 
 This makes `File2Agent` less of a slogan and more of a control mechanism for coverage quality.
+
+## When A Subagent Tends To Run Too Long
+
+If the underlying model is weak at long-horizon scheduling, or if it already shows repeated `read`, repeated editing, or delayed handoff behavior, it is better to harden the subtask itself.
+
+A practical pattern is:
+
+1. one subagent reads one file,
+2. it extracts only a limited batch of `entity` / `concept` candidates,
+3. once it reaches the cap, it stops and returns results to the main agent,
+4. the main agent decides whether another round is needed.
+
+That cap can be `10`, or another value. The important part is not the number itself. The important part is giving the subtask a reliable return point.
+
+This is especially useful when:
+
+1. the file is long,
+2. one file can generate many candidate nodes,
+3. the model tends to loop on longer runs,
+4. the main agent needs more frequent quality and direction checks.
+
+In other words, `File2Agent` does not only mean "one file, one owner." It can also mean "one file, one bounded batch, one clean handoff."
 
 ## Naming Note
 

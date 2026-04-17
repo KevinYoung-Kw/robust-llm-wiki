@@ -7,7 +7,7 @@
 > `SPEC` 负责解释这个框架“是什么、边界在哪里”；`robust-llm-wiki-CLAUDE.zh-CN.md` 负责解释 agent 在这些边界内“应该如何运行”。
 
 > [!TIP]
-> 当前 released schema baseline: `v0.1.2`
+> 当前 released schema baseline: `v0.1.3`
 
 `schema/` 这组文档要回答的是一个很实际的问题：怎样把一个长期运行的 LLM-Wiki 设计成可维护、可追溯、可治理，而不是越积越乱。
 
@@ -35,6 +35,7 @@
 1. [robust-llm-wiki-CLAUDE.zh-CN.md](./robust-llm-wiki-CLAUDE.zh-CN.md)
 2. [details/03-lint-playbook.zh-CN.md](./details/03-lint-playbook.zh-CN.md)
 3. [details/06-claude-hook-guidelines.zh-CN.md](./details/06-claude-hook-guidelines.zh-CN.md)
+4. [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md)
 
 ### 我需要定义或扩展字段
 
@@ -52,11 +53,13 @@
 
 1. [robust-llm-wiki-CLAUDE.zh-CN.md](./robust-llm-wiki-CLAUDE.zh-CN.md)
 2. [details/05-file2agent-context-engineering.zh-CN.md](./details/05-file2agent-context-engineering.zh-CN.md)
+3. [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md)
 
 ### 我需要幻觉控制与模型分工建议
 
 1. [details/04-hallucination-control.zh-CN.md](./details/04-hallucination-control.zh-CN.md)
 2. [details/07-turbo-model-value.zh-CN.md](./details/07-turbo-model-value.zh-CN.md)
+3. [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md)
 
 ### 我需要法律或开源治理规则
 
@@ -82,6 +85,7 @@
 | [details/05-file2agent-context-engineering.zh-CN.md](./details/05-file2agent-context-engineering.zh-CN.md) | 长文件阅读、context 限制与 `1 subagent -> 1 file` 风格协作 |
 | [details/06-claude-hook-guidelines.zh-CN.md](./details/06-claude-hook-guidelines.zh-CN.md) | hook 触发点建议与轻量级 guardrail |
 | [details/07-turbo-model-value.zh-CN.md](./details/07-turbo-model-value.zh-CN.md) | 更快或更便宜模型适合做什么、不适合做什么 |
+| [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md) | 长程 agent 调度里的低破坏性、可观测性与模型/运行栈选择 |
 
 ## 一个简单原则
 

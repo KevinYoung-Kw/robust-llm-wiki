@@ -2,7 +2,7 @@
 [中文](./SPEC.zh-CN.md) | **English**
 
 > Status: Stable architecture/reference
-> Version: `v0.1.2`
+> Version: `v0.1.3`
 > Scope: This file defines what Robust LLM-Wiki is and what it must preserve. It does not define operator workflow details or tool-specific runbooks.
 
 ## 1. Why Robust LLM-Wiki Exists
@@ -77,13 +77,34 @@ At the architectural level, this means:
 - maintainability matters more than one-pass completeness
 - model choice should be judged by comparable evidence, not by "newer must be better"
 
-## 6. Extension Boundaries
+## 6. Harmless Engineering Priority
+
+Beyond low hallucination, Robust LLM-Wiki also requires the agent runtime itself to stay low-damage, observable, stoppable, and handoff-safe.
+
+Here, harmless engineering is not an abstract slogan. It is a practical operating condition:
+
+if an agent needs many rounds of `grep`, `read`, `write`, and `handoff` around the same source file, possibly across long tool-call chains, the system should not easily fall into repeated reading, repeated editing, state drift, or endless continuation.
+
+At the architectural level, this means:
+
+- tool-calling support alone is not enough to qualify as a safe long-horizon default
+- model choice should consider stability in long tool chains, not only writing quality
+- the agent stack should expose traces, stop reasons, handoffs, and intermediate state
+- high-leverage ingest and synthesis work should prefer model/runtime combinations that remain steadier over long execution
+
+If this layer fails, the problem is not only inefficiency. The larger risk is that unstable intermediate state gets written into the wiki and then reused by later `query`, backlinking, and entity / concept creation.
+
+See [details/08-harmless-engineering.md](./details/08-harmless-engineering.md) for the detailed rationale.
+
+## 7. Extension Boundaries
 
 Robust LLM-Wiki is intentionally extensible, but not unconstrained.
 
 - Projects may add page types beyond `entity` and `concept`.
 - Projects may add fields when those fields have clear ingest-time meaning.
-- Templates may guide metadata and structure, but should not rigidly over-specify page bodies.
+- Templates may constrain metadata and minimum page-safety expectations, but should not lock `entity` / `concept` pages into one fixed body outline.
+
+That boundary matters. The stable part of the system is page attributes, not a universal outline. A wiki page is first a node in a knowledge graph: it needs to support wikilinks, navigation, and later maintenance. Once a template forces every body into the same structure, pages often become neat in format but weaker as connected, maintainable wiki nodes.
 
 Extensions remain inside the spec only when all of the following stay true:
 
@@ -93,7 +114,7 @@ Extensions remain inside the spec only when all of the following stay true:
 
 In other words: flexibility is welcome, but schema growth should reduce future ambiguity, not create it.
 
-## 7. Distilled Signals From Practice
+## 8. Distilled Signals From Practice
 
 This spec is grounded in real maintenance work on long-running LLM wikis, but the top-level lesson is more important than the raw tables.
 
@@ -107,7 +128,7 @@ Across anonymized practice samples, the same signals keep appearing:
 
 Detailed measurements and case evidence belong in `research/`, especially `research/2026-04-17-two-wikis-engineering-notes.md`.
 
-## 8. What This SPEC Does Not Standardize
+## 9. What This SPEC Does Not Standardize
 
 This file is deliberately not a runbook.
 
@@ -120,13 +141,13 @@ It does not standardize:
 
 Those choices remain project-dependent as long as they preserve the kernel, the layering, and the low-hallucination priority described here.
 
-## 9. Reading Map
+## 10. Reading Map
 
 Use the repository docs in this order:
 
 1. `schema/SPEC.md`: architecture, boundaries, and shared reference truths
 2. `schema/robust-llm-wiki-CLAUDE.md`: operator policy and execution safety rules
-3. `schema/details/*.md`: focused rules and implementation-level guidance
+3. `schema/details/*.md`: focused rules and implementation-level guidance, especially around hallucination control, File2Agent, hooks, turbo routing, and harmless engineering
 4. `research/*`: evidence, benchmarks, and case notes
 
 `SPEC` should explain the system. `CLAUDE` should explain how to run it safely.

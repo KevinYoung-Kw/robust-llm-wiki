@@ -51,7 +51,46 @@ Use this field set as a minimum operating baseline, not as a decorative template
 3. Add project-specific fields only when they have a clear ingest-time meaning.
 4. If a field cannot be updated or validated consistently, it probably should not exist yet.
 
-## 5. Why This Contract Matters
+## 5. Why We Do Not Recommend Outline Templates For `entity` / `concept` Pages
+
+The key distinction is this: we are not rejecting templates entirely. We are rejecting templates that hard-code page bodies into one fixed outline.
+
+The reason is simple: an entity page or concept page must first remain a wiki page, not a form to fill.
+
+When a template locks the body outline too tightly, models tend to become mechanical:
+
+1. every page inherits the same heading skeleton, which looks tidy but drifts away from a real wiki
+2. wikilinks become weaker because the model spends effort filling outline slots instead of organizing relations
+3. sources often get pushed to the end while the page body lacks enough `[[wikilinks]]`
+4. pages become self-contained documents rather than navigable nodes in a graph
+
+But a wiki is not trying to make every page look identical.
+
+A wiki is trying to preserve knowledge as maintainable pages and connect those pages through links. Different entities and concepts naturally need different shapes. Some pages should start with a definition. Others should start with relationships, chronology, or disputes. If body structure is locked too early, the result is often a document that looks page-like, but not a page that behaves like a maintainable wiki.
+
+## 6. Why Templates Should Mainly Constrain Attributes
+
+The stable part of a template is metadata, not the body skeleton.
+
+That is because metadata directly serves system maintenance:
+
+1. AI needs fields to know what a page is, where it came from, and whether it is safe to trust
+2. ingest, query, and lint need the same fields to stay aligned
+3. fields are reviewable, traceable, and governable at scale, while body outlines usually are not
+
+That is why this repository recommends:
+
+1. let templates constrain the minimum frontmatter / note attributes
+2. keep body requirements at the wiki level: readable, linkable, rich in wikilinks when appropriate, and not isolated
+3. separate human-read needs from AI-read needs instead of forcing both into one rigid outline
+
+In short:
+
+1. AI readability mainly comes from stable attributes
+2. human readability mainly comes from natural body writing
+3. wiki maintainability mainly comes from the wikilink network, not from a uniform outline
+
+## 7. Why This Contract Matters
 
 Without a shared attribute contract, pages of the same kind drift into different shapes.
 
@@ -63,7 +102,7 @@ That creates a familiar failure pattern:
 
 The result is not just messy metadata. The result is rising maintenance cost.
 
-## 6. Extension Rule
+## 8. Extension Rule
 
 When you want to add a new field, do not start by writing it everywhere.
 
