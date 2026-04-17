@@ -11,7 +11,7 @@
 
 Robust LLM-Wiki is an open-source framework for long-term, low-drift Wiki maintenance with AI.
 
-It is not a new content Wiki repository. It distills real maintenance experience into reusable methods:
+This repository is for methodology, not for publishing private wiki content. We ran two real LLM-Wikis over a long period, encountered recurring operational issues, and extracted the reusable parts into a transferable framework:
 
 1. `Research` (evidence and recurring problems)
 2. `Schema` (non-negotiable boundaries and operating rules)
@@ -36,11 +36,11 @@ It is not a new content Wiki repository. It distills real maintenance experience
 | Markdown lines | `779,376` |
 | Wikilinks (`[[...]]`) | `17,780` |
 
-At this scale, the hard part is not writing pages. The hard part is keeping quality stable over time.
+At this scale, the core challenge is sustaining maintenance quality over time, not just finishing one-time page creation.
 
 ## Why This Project Exists
 
-We observed recurring failure patterns during long-term maintenance of two real LLM-Wikis:
+The motivation is straightforward: long-running operation of two real LLM-Wikis exposed the same classes of failure repeatedly, so we turned the repair patterns into reusable guidance. This repository publishes methods, rules, and validation structure, not the private contents of those Wikis:
 
 1. Human-read and AI-read goals become mixed, so pages are either hard to read or hard to process.
 2. Overuse of rigid outlines drifts away from the Wiki form.
@@ -49,7 +49,7 @@ We observed recurring failure patterns during long-term maintenance of two real 
 
 ## Core Idea
 
-Robust does not mean “more features.” It means “more stable maintenance mechanisms.”
+Robust focuses on maintaining stability in operations and governance.
 
 1. Keep Karpathy kernel unchanged.
 2. Use `Schema` to define hard boundaries and safe extension space.
