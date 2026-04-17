@@ -2,6 +2,11 @@
 
 **中文** | [English](./README.md)
 
+[![Latest Release](https://img.shields.io/github/v/release/KevinYoung-Kw/robust-llm-wiki?label=release)](https://github.com/KevinYoung-Kw/robust-llm-wiki/releases)
+[![GitHub Stars](https://img.shields.io/github/stars/KevinYoung-Kw/robust-llm-wiki?style=flat)](https://github.com/KevinYoung-Kw/robust-llm-wiki/stargazers)
+[![License](https://img.shields.io/github/license/KevinYoung-Kw/robust-llm-wiki)](./LICENSE)
+[![Docs](https://img.shields.io/badge/docs-bilingual-2f6feb)](./schema/README.zh-CN.md)
+
 ![Robust LLM-Wiki Banner](./assets/github-banner-en.webp)
 
 Robust LLM-Wiki 是一个面向 AI 长期维护场景的开源 Wiki 框架实践项目。
