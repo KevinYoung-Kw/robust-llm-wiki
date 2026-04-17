@@ -93,9 +93,9 @@ Robust 不是“功能更多”，而是“维护机制更稳”。
 
 ## 快速开始
 
-1. 先读 [schema/README.zh-CN.md](./schema/README.zh-CN.md)。
-2. 按其中的顺序进入 [schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md) 和 [schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)。
-3. 在落地时用 [research/RESEARCH.zh-CN.md](./research/RESEARCH.zh-CN.md) 和快照作为证据锚点。
+1. 先读 [quickstart/README.zh-CN.md](./quickstart/README.zh-CN.md)。
+2. 根据自己的情况选路径：把这套框架接入你现有的 LLM-Wiki，或者直接基于它生成新的 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`。
+3. 然后再进入 [schema/README.zh-CN.md](./schema/README.zh-CN.md)、[schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md) 和 [schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)。
 
 ## Karpathy 内核（不偏离）
 

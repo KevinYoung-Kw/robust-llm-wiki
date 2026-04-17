@@ -1,60 +1,69 @@
-# Lint Playbook (Detailed)
+# Lint Playbook
 [中文](./03-lint-playbook.zh-CN.md) | **English**
 
-## Background
+> Read this page when you need to decide what to check first, what to check later, and how to keep lint from turning into repeated wasted work.
 
-1. As Wiki page volume grows, manual checking gets slower and slower.
-2. If lint order is wrong, repeated checking increases significantly.
-3. The goal of this document is to finish required checks in the fewest rounds.
+## 1. The Basic Order
 
-## Recommended Order
+Run lint in this order:
 
-1. Property lint
-2. Link lint
-3. Content lint
+1. `property`
+2. `link`
+3. `content`
 
-## Why This Order
+This order is not arbitrary. It exists because the later checks are more expensive and more misleading if the earlier shape problems are still broken.
 
-1. Property lint is the fastest; clear structural issues first.
-2. Link lint in step two catches broken links and isolated pages early.
-3. Content lint is last because semantic checks are the most time-consuming.
+## 2. Why This Order Saves Time
 
-## What Happens If You Ignore This Order
+If the page structure is broken, content checks are premature.
 
-1. If you start from content checks, you waste time on broken structures.
-2. If link issues are not fixed first, content judgment generates false positives.
-3. You still need to go back and recheck later, which means repeated work.
+If links are broken, content checks produce noise.
 
-## Suggested Rhythm
+If both structure and links are healthy, then content checks become worth the effort.
 
-1. After each ingest, run fast `property + link` first.
-2. Run full `content lint` periodically.
-3. Keep lint snapshots before and after major changes for diff and rollback.
+That is why the practical sequence is:
 
-## High-Risk Hotspot Hints (From Real Samples)
+1. clear structural issues first
+2. clear navigational issues second
+3. judge meaning last
 
-1. `log.md` and `index.md` are usually the longest pages and should be in the high-frequency check list.
-2. Add dedicated checks for suspected engineering-noise paths (for example abnormal directory names containing `$(...)`).
-3. For newly added entity/concept pages with many new relations, add one extra `read/grep` quick check to reduce old-error spread risk.
+## 3. Suggested Rhythm
 
-## Path And Shell Safety Checks (New)
+Use lint as a rhythm, not as a one-time event.
 
-1. For new directories/files, avoid unescaped spaces, single quotes, and double quotes by default.
-2. If business needs require spaces or quotes, scripts must use consistent path quoting and must not concatenate raw paths unsafely.
-3. Extend lint with path-risk scanning:
-   - suspected unexpanded variables (for example `$(...)`)
-   - path concatenation patterns with spaces/quotes but without safe handling
-4. When path risk is found, fix script safety first, then continue batch ingest/query work.
+1. After each ingest, run fast `property + link` lint first.
+2. Run fuller `content lint` on a broader cadence.
+3. Keep snapshots before and after major changes so diff and rollback stay easy.
 
-## Source Basis (External Gist/Repo + Project Inference)
+## 4. Hotspots Worth Extra Attention
 
-Direct external sources:
+Some files deserve more suspicion than others.
+
+1. `log.md` and `index.md` often become the longest and busiest operational pages.
+2. Newly added entity/concept pages with many fresh relations deserve one extra `read/grep` check.
+3. Suspected engineering-noise paths should be checked explicitly instead of waiting for them to become content corruption.
+
+## 5. Path And Shell Safety
+
+Lint is also where repository hygiene protects the wiki from tooling mistakes.
+
+1. Avoid unescaped spaces, single quotes, and double quotes in new paths by default.
+2. If spaces or quotes are unavoidable, the scripts must quote them consistently.
+3. Do not concatenate raw paths unsafely.
+4. Add path-risk scans for:
+   - suspected unexpanded variables such as `$(...)`
+   - path concatenation patterns with spaces or quotes but without safe handling
+5. When path risk appears, fix the script safety issue first and resume batch ingest/query second.
+
+## 6. What This Playbook Is Trying To Prevent
+
+The real enemy is not lint cost by itself. The real enemy is re-check cost.
+
+When lint order is wrong, teams spend time judging content that will later need to be re-judged after structure and links are repaired. A good lint playbook reduces that wasted loop.
+
+## 7. Useful References
 
 1. ShellCheck repository: <https://github.com/koalaman/shellcheck>
-2. ShellCheck rule SC2086 (double-quote to prevent word splitting/globbing): <https://github.com/koalaman/shellcheck/wiki/SC2086>
-3. ShellCheck rule SC2046 (quote command substitution output): <https://github.com/koalaman/shellcheck/wiki/SC2046>
-4. Karpathy original gist (workflow baseline): <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>
-
-Inference note:
-
-1. The concrete path naming constraints here (spaces/quotes policy and lint checks) are project-level hardening rules derived from shell safety best practices plus observed risks in our Wiki samples.
+2. ShellCheck SC2086: <https://github.com/koalaman/shellcheck/wiki/SC2086>
+3. ShellCheck SC2046: <https://github.com/koalaman/shellcheck/wiki/SC2046>
+4. Karpathy original gist: <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>

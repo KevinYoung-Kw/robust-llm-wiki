@@ -1,88 +1,116 @@
-# 幻觉治理（详细）
+# 幻觉治理
 **中文** | [English](./04-hallucination-control.md)
 
-## 0. 背景（为什么要做这件事）
+## 一句话版本
 
-1. 一开始我们使用了幻觉更高的模型做编译和维护，结果在 Wiki 里出现了事实偏差。
-2. 后续只能切换到幻觉更低的模型，配合多轮 lint、grep、read 去做修复。
-3. 一次修复里改了 7 个 entity，但仍然需要多轮 grep/read 才能稳定。
-4. 这说明 LLM-Wiki 必须坚持“弱幻觉优先”。
-5. 原因很直接：如果旧内容里有幻觉，新一轮 ingest/query 可能继续引用它，错误会被继承并扩散。
+在一个健壮的 LLM-Wiki 里，幻觉治理不是收尾阶段才做的清洁工作，而是上游设计选择。
 
-所以，这个文档不是为了讨论“哪个模型更强”，而是为了回答：  
-在持续维护 Wiki 时，怎样把幻觉风险压到更低。
+如果第一次 ingest 就把不存在的人名、日期、关系或引用写进来，后续的 `query`、`backfill`、`lint` 往往会继续复用这些错误。到了那一步，仓库里已经不只是“存在错误事实”，而是“开始围绕错误事实继续长出结构”。
 
-## 1. 实战样例（脱敏）
+所以这份文档只强调一个简单原则：
 
-| Wiki 页面 | 状态 | 关键发现（脱敏） |
-|---|---|---|
-| 实体 A | 已修正 | 媒体来源名称纠正；补充方法模型说明 |
-| 实体 B | 已修正 | 关键日期冲突已修正 |
-| 实体 C | 已补充 | 别名与身份信息已补充 |
-| 实体 D | 已修正 | 同名混淆已拆分；错误跳转链接已修正 |
-| 实体 E | 已补充 | 竞赛结果与作品清单已补充 |
-| 实体 F | 已修正 | 参与人数表述已纠正；子页面信息已同步 |
+1. ingest 与高风险事实综合，优先使用更弱幻觉的模型；
+2. 榜单分数用来辅助分工，不用来做口号式宣传；
+3. 凡是会成为其他页面结构参考的页面，都应该增加核验力度。
 
-## 2. 同口径模型对比（主口径：Vectara）
+## 为什么这件事重要
 
-主榜单页面更新时间：2026-03-20（截至 2026-04-17 暂无更近公开更新）。
+LLM-Wiki 的幻觉问题有一个会累积的失效模式：
 
-| 厂商/模型条目 | Hallucination Rate | 说明 |
-|---|---:|---|
-| deepseek-ai/DeepSeek-V3.2-Exp | 5.3% | 当前同口径较低 |
-| openai/gpt-5.4-nano-2026-03-17 | 3.1% | 当前同口径更低条目之一 |
-| openai/gpt-5.4-mini-2026-03-17 | 5.5% | 当前同口径较低 |
-| MiniMaxAI/minimax-m2p5 | 9.1% | 同榜单优于 `minimax-m2p1(11.8%)` |
-| zai-org/GLM-4.7-flash | 9.3% | 较 `GLM-4.5-AIR-FP8` 更新，数值持平 |
-| zai-org/glm-5 | 10.1% | 更近版本，但该口径下更高 |
-| anthropic/claude-haiku-4-5-20251001 | 9.8% | 当前可见 Haiku 条目 |
-| anthropic/claude-sonnet-4-6 | 10.6% | 较 `claude-sonnet-4(10.3%)` 更新，但更高 |
-| moonshotai/Kimi-K2.5 | 14.2% | 当前可见 Kimi 主条目 |
-| moonshotai/Kimi-K2-Instruct-0905 | 17.9% | 同族对照条目 |
+1. 某一页里出现了错误陈述；
+2. 后续页面在建关联时 `read` 或 `grep` 到它；
+3. 这条错误被复制、转述、或者整理成新的表达；
+4. 仓库里开始出现多页“彼此一致、但一起出错”的内容。
 
-补充：
-1. Codex 在部分评测页有排名条目，但静态页没有统一可引用的幻觉率数字。
-2. 新版本不一定更低幻觉率，选型要看同口径实测值。
+这时问题就不再是“某一处有幻觉”，而是“局部错误开始进入知识图谱本身”。
 
-## 3. 怎么理解这些分数
+因此，幻觉治理应该被放在工作流前部，和来源处理、文件所有权、页面状态这些问题并列，而不是全都留到最后。
 
-1. 只有同一榜单内的结果可以直接横向比较。
-2. 不同榜单（SimpleQA、AA-Omniscience、Vectara）定义不同，不能直接比绝对值。
-3. 这里主要是摘要任务口径，不等于你在生产里的全部任务。
-4. 看 hallucination rate 时，要一起看 answer rate，避免单指标误判。
+## 这份文档是拿来做什么的
 
-## 4. 一个简单判断：初次编译不干净，后面就会很难降
+当你需要判断以下事情时，就应该看这份文档：
 
-先用一个简单公式看趋势：
+1. 第一轮 ingest 应该交给哪类模型；
+2. 哪些页面必须做二次核验；
+3. 哪些改动应该继续停留在 `draft`，而不是过早回到 `stable`。
+
+这份文档并不是为了证明某个厂商“绝对最好”。它只是为当前仓库规定一个实操规则：当事实错误会不断外溢时，更低的幻觉风险就具有明确的工程价值。
+
+## 应该怎样读公开幻觉榜单
+
+公开榜单可以参考，但前提是读法要稳妥：
+
+1. 只在同一榜单内做横向比较；
+2. 新版本模型要当作“新的候选项”，不要自动视为升级；
+3. 榜单只参与路由判断，不提供完整的生产保证；
+4. 要注意任务口径差异，摘要榜单很有参考价值，但不等于完整的 wiki 写作场景。
+
+换句话说，榜单更适合回答“在这个测量口径下，谁更不容易胡编”，而不是“谁可以代替审慎判断”。
+
+## 一个实用的判断框架
+
+幻觉的代价通常不是线性的。
+
+当一轮维护要新建很多页面、补很多旧页链接、或者改写上层总结时，一个错误事实会反复出现。可以用一个简单的心智模型去理解：
 
 \[
-\Delta H \approx p \times (n_{entity}+n_{concept}) + c \times n_{read/grep}
+\Delta H \approx p \times (n_{new\ facts}) + c \times n_{reuse}
 \]
 
 其中：
 
-1. \(p\)：当前模型幻觉率
-2. \(n_{entity}\)：本轮新生成的 entity 数量
-3. \(n_{concept}\)：本轮新生成的 concept 数量
-4. \(n_{read/grep}\)：本轮为了建关联而进行的 read/grep 次数
-5. \(c\)：每次 read/grep 把旧误差带入新页面的平均影响系数
-6. \(\Delta H\)：这一轮新增的幻觉量
+1. \(p\) 表示模型在当前任务下生成无依据陈述的倾向；
+2. \(n_{new\ facts}\) 表示本轮新增的事实单元数；
+3. \(n_{reuse}\) 表示建关联时复用旧内容的规模；
+4. \(c\) 表示旧错误被带入新页面后的平均扩散成本。
 
-这表示：  
-一次编译如果产出很多 entity/concept，且模型幻觉率偏高，新增幻觉会明显变多。  
-后续新增关联时，Agent 会反复 read/grep 旧页面，如果旧页面里已有幻觉，这些错误会继续被带到新页面。  
-后面即使开始修复（例如这次已经修了 7 个 entity），也常常需要多轮 grep/read/lint 才能把整体幻觉率往下压。
+这个公式不是精算工具，但它能抓住工程上的核心事实：第一轮越脏，后面的清理成本就越高。
 
-## 5. 执行建议（弱幻觉优先）
+## 推荐的执行策略
 
-1. Ingest 编译优先选同口径下低幻觉模型。
-2. Query 的关键结论做二次核验，重点查来源和链接。
-3. 高风险页面改动后，增加一轮 read/grep 校验再入稳定区。
-4. 每轮修复后都跑 lint，并保留快照做对比。
+### 1. ingest 优先选弱幻觉模型
 
-## 6. 数据来源（可复核）
+如果任务是在生成页面骨架、把来源整理成规范事实、或者撰写那些未来会被大量引用的核心页面，那么默认应该把任务交给当前团队可用的更弱幻觉模型。
 
-1. 主榜单（GitHub）：https://github.com/vectara/hallucination-leaderboard
-2. 榜单原文（README）：https://raw.githubusercontent.com/vectara/hallucination-leaderboard/main/README.md
-3. 方法说明（README#Methodology）：https://github.com/vectara/hallucination-leaderboard#methodology
-4. Vectara 方法博文：https://www.vectara.com/blog/introducing-the-next-generation-of-vectaras-hallucination-leaderboard
+### 2. 高杠杆页面加一轮核验
+
+并不是每一页的风险都一样。以下页面更适合增加二次检查：
+
+1. 索引页、术语表、时间线、synthesis 页面；
+2. 被频繁引用的 entity / concept 页面；
+3. 负责裁决身份、命名、日期冲突的页面；
+4. 后续会被拿来继续汇总、再加工的页面。
+
+### 3. 有风险就继续放在 `draft`
+
+如果来源锚定还不完整、跨页一致性还不清楚、或者一次改动牵动了大量链接，就不应该急着标成稳定。先留在 `draft`，让后续核验有明确入口。
+
+### 4. 事实修复之后也要重新 lint
+
+幻觉修复不只是“文字纠错”。它经常会连带影响别名、回链、日期字段和页面跳转目标。所以修完事实之后，结构与链接检查也要再跑一轮。
+
+## 什么样的做法算是做对了
+
+在这个仓库里，比较好的幻觉治理通常具备这些特征：
+
+1. ingest 的模型选择优先考虑事实克制，而不是只看表达流畅；
+2. 爆炸半径更大的页面会获得额外核验；
+3. 还有矛盾没解决的页面会明确留在暂存状态；
+4. 团队默认把旧 wiki 内容视为“可参考但仍需校验”，而不是天然可信。
+
+最后这一点很关键。一个页面并不会因为“它已经存在”就自动变得可靠。在持续演化的 LLM-Wiki 里，旧页面既可能是证据链的一部分，也可能是旧错误的载体。
+
+## 数据来源
+
+下面这些公开材料为本页的方法提供了可复核依据：
+
+1. Vectara Hallucination Leaderboard：<https://github.com/vectara/hallucination-leaderboard>
+2. 榜单 README：<https://raw.githubusercontent.com/vectara/hallucination-leaderboard/main/README.md>
+3. 方法说明：<https://github.com/vectara/hallucination-leaderboard#methodology>
+4. 方法综述：<https://www.vectara.com/blog/introducing-the-next-generation-of-vectaras-hallucination-leaderboard>
+
+## 延伸阅读
+
+1. [SPEC](../SPEC.zh-CN.md)
+2. [robust-llm-wiki-CLAUDE.zh-CN.md](../robust-llm-wiki-CLAUDE.zh-CN.md)
+3. [07-turbo-model-value.zh-CN.md](./07-turbo-model-value.zh-CN.md)

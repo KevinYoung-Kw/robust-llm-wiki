@@ -7,7 +7,7 @@
 > `SPEC` 负责解释这个框架“是什么、边界在哪里”；`robust-llm-wiki-CLAUDE.zh-CN.md` 负责解释 agent 在这些边界内“应该如何运行”。
 
 > [!TIP]
-> 当前 released schema baseline: `v0.1.1`
+> 当前 released schema baseline: `v0.1.2`
 
 `schema/` 这组文档要回答的是一个很实际的问题：怎样把一个长期运行的 LLM-Wiki 设计成可维护、可追溯、可治理，而不是越积越乱。
 

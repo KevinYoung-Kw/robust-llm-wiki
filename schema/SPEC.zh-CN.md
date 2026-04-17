@@ -2,7 +2,7 @@
 **中文** | [English](./SPEC.md)
 
 > 状态：稳定的架构/参考文档
-> 版本：`v0.1.1`
+> 版本：`v0.1.2`
 > 范围：这份文档回答 Robust LLM-Wiki 是什么、必须保留什么；它不负责定义 operator workflow 细节，也不负责规定具体工具实现。
 
 ## 1. 为什么需要 Robust LLM-Wiki

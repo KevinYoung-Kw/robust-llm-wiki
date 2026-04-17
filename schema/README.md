@@ -7,7 +7,7 @@
 > `SPEC.md` explains the architecture and boundaries. `robust-llm-wiki-CLAUDE.md` explains how agents should operate inside those boundaries.
 
 > [!TIP]
-> Current released schema baseline: `v0.1.1`
+> Current released schema baseline: `v0.1.2`
 
 The `schema/` folder answers a practical question: how should a long-running LLM-Wiki be structured, maintained, and governed so that it stays useful over time?
 

@@ -1,48 +1,125 @@
-# Claude Hook Recommendations (Detailed)
+# Claude Hook Guidelines
 [中文](./06-claude-hook-guidelines.zh-CN.md) | **English**
 
-## 0. What Problem This Document Solves
+## The Short Version
 
-1. In LLM-Wiki maintenance, many errors are not caused by “not knowing what to do,” but by “not checking in time after doing it.”
-2. If all checks are postponed to the end, rework cost keeps increasing.
-3. Hook adds baseline checks earlier in the workflow, reducing omissions and rework.
+Hooks exist to catch obvious mistakes while the work is still cheap to correct.
 
-## 1. Core Positioning
+They are not substitutes for judgment, and they are not full audits. Their job is to provide light, repeatable process guardrails at the moments where teams most often forget to check.
 
-Hook is a lightweight full-process guardrail, not a feature tied to only one stage.  
-It can support multiple stages: reading, writing, backfilling, lint, and more.
+In this repo, the most important hook principle is simple:
 
-## 2. Suggested Trigger Points (Reference Ideas)
+run fast checks close to writes, not only at the end of a long editing session.
 
-1. Trigger before reading: remind file size and suggested division of labor (whether a single-file subagent is better).
-2. Trigger before writing: check required fields, source references, and wikilink placeholders.
-3. Trigger after every AI file write: run one fast lint round (minimum checks).
-4. Trigger after batch changes: run a broader lint round (broken links, naming conflicts, obvious contradictions).
-5. Trigger after entity/concept backfill: run a read/grep quick check to confirm new-old page consistency.
+## What Problem Hooks Solve
 
-## 3. Checks Suitable For Hook
+Many wiki maintenance errors do not come from a lack of knowledge. They come from delayed verification.
 
-1. Structure checks: missing fields, obvious format errors, title/type mismatch.
-2. Link checks: broken links, island-page tendency, missing backlinks.
-3. Naming checks: duplicate names, same-name ambiguity, alias conflicts.
-4. Basic factual checks: obvious time conflicts, missing sources, self-contradiction on the same page.
+1. a page is edited,
+2. the change seems plausible,
+3. the team keeps moving,
+4. only much later does someone discover a missing field, broken link, naming conflict, or obvious contradiction.
 
-## 4. What Should Not Be Put Into Hook
+By then the cost is higher, because later edits may already depend on that page.
 
-1. Complex long-chain reasoning and large-scale semantic rewriting.
-2. High-cost, full-repo deep audits.
-3. Final decisions that strongly depend on human context judgment.
+Hooks push a small amount of checking earlier in the loop. That is their value.
 
-Note: Hook is for “fast reminders” and “baseline guardrails,” not a replacement for full review.
+## What A Hook Should Be In This Framework
 
-## 5. Relationship With Lint
+Within robust LLM-Wiki, a hook should be:
 
-1. Hook can handle “fast lint after each write.”
-2. Lint still needs periodic full checks.
-3. They are complementary: Hook blocks bad changes early; lint performs systematic scanning.
+1. lightweight,
+2. predictable,
+3. close to the moment of risk,
+4. focused on errors that are cheap to detect and expensive to ignore.
 
-## 6. Relationship With File2Agent
+That means hooks are best used for structural checks, naming checks, link checks, and other fast safeguards that help the repo stay tidy while people and agents are still editing.
 
-1. File2Agent solves division of labor: who reads and how to read.
-2. Hook solves process timing: when to check and which errors to block first.
-3. Combined together, they usually reduce omission rates in long-file ingest significantly.
+## The Most Useful Trigger Points
+
+The following trigger points usually provide the best return:
+
+### Before reading
+
+Warn when a file is large, structurally dense, or likely to need a dedicated subagent.
+
+### Before writing
+
+Check whether the target page has the required fields, source anchors, and expected page type.
+
+### After every AI file write
+
+Run the fastest meaningful lint pass. This is the single most valuable trigger because it catches damage at the point where correction is still cheap.
+
+### After batch changes
+
+Run a broader pass for broken links, alias conflicts, duplicate names, and obvious repository-level inconsistencies.
+
+### After backfill or relation updates
+
+Confirm that newly added links and the pages they point to still agree with each other.
+
+## What Hooks Are Good At
+
+Hooks are well suited for:
+
+1. missing required fields,
+2. obvious formatting mistakes,
+3. title or type mismatches,
+4. broken-link or missing-backlink signals,
+5. duplicate-name and alias-conflict warnings,
+6. shallow factual red flags such as impossible dates or self-contradiction on the same page.
+
+These checks are valuable precisely because they are narrow. A good hook does not try to be wise. It tries to be timely.
+
+## What Hooks Should Not Try To Do
+
+Hooks should not absorb tasks that belong to slower review layers.
+
+Avoid using hooks for:
+
+1. complex multi-step reasoning,
+2. large-scale semantic rewriting,
+3. whole-repo deep audits,
+4. final conclusions that depend on nuanced human context.
+
+When hooks try to do too much, they become noisy, slow, and easy to ignore. Once that happens, teams stop trusting them.
+
+## Relationship To Lint
+
+Hooks and lint are complementary, not interchangeable.
+
+1. hooks catch mistakes near the point of change,
+2. lint performs broader and more systematic scanning,
+3. both are needed if the repo is meant to stay stable over time.
+
+Another simple way to say it:
+
+hooks reduce bad writes entering the graph,
+lint reduces unnoticed drift accumulating across the graph.
+
+## Relationship To File2Agent
+
+`File2Agent` decides who should read and own a difficult source.
+
+Hooks decide when to stop and verify before errors become expensive.
+
+Together they create a healthier loop:
+
+1. deep reading gets assigned more deliberately,
+2. writing gets checked sooner,
+3. structural mistakes stop spreading quite so easily.
+
+## Recommended Operating Posture
+
+If a team is unsure where to begin, start with one discipline:
+
+always run a fast hook-style lint after each AI file write.
+
+That single habit already prevents a surprising amount of rework. Later, the hook system can expand to include stronger checks, but it should earn that complexity rather than start with it.
+
+## See Also
+
+1. [03-lint-playbook.md](./03-lint-playbook.md)
+2. [05-file2agent-context-engineering.md](./05-file2agent-context-engineering.md)
+3. [robust-llm-wiki-CLAUDE.md](../robust-llm-wiki-CLAUDE.md)

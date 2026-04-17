@@ -1,59 +1,75 @@
-# Ingest Field Operational Rules (Detailed)
+# Ingest Field Rules
 [中文](./02-ingest-field-rules.zh-CN.md) | **English**
 
-## Background
+> Read this page when you need to decide whether a new field is ready to be written into the wiki at scale.
 
-1. A field is useful not because of its name, but because `raw -> wiki` operational rules are explicit.
-2. In real maintenance, we observed that “field first, rule later” creates large rework.
-3. This document shifts field rules left to reduce later repair cost.
+## 1. The Core Rule
 
-## Why This Must Be Done First
+A field is not ready just because it has a good name.
 
-1. Without ingest rules, fields with the same name can mean different things on different pages.
-2. When rules are unclear, AI writing becomes inconsistent, and later debugging needs multiple grep/read rounds.
-3. At larger page scale, field conflicts keep reappearing in ingest/query.
+A field becomes usable only when the `raw -> wiki` path for that field is explicit. If the system does not know where the value comes from, how it is normalized, and when it is allowed to change, the field will create repair work later.
 
-## Must Be Defined Before Adding Any New Field
+That is why this document treats field rules as something to define before scale, not after scale.
 
-1. Source: what type of raw information this field is extracted from.
-2. Normalization: what format this value must be unified to.
-3. Default: what to fill (or not fill) when evidence is missing.
-4. Update strategy: when to update and when to keep old values.
-5. Conflict handling: what rule decides among inconsistent multi-source values.
+## 2. What Must Be Defined Before Adding A Field
 
-## Why These Five Items Must Be Defined
+Before a new field is written broadly, define all five of these:
 
-1. Source definition: makes fields traceable.
-2. Normalization definition: makes same-type values comparable and searchable.
-3. Default definition: prevents nulls from being treated as true values.
-4. Update strategy definition: prevents new noise from overwriting confirmed information.
-5. Conflict-handling definition: avoids long-term self-contradictions for one entity.
+1. `Source`: what kind of raw evidence this field is extracted from
+2. `Normalization`: what shape the value must be converted into
+3. `Default`: what to do when evidence is missing or incomplete
+4. `Update strategy`: when to overwrite, when to preserve, and when to defer
+5. `Conflict handling`: how to resolve inconsistent values across sources
 
-## Minimum Operational Requirements
+If one of these remains vague, the field is not ready.
 
-1. Rules must be documented and reviewable.
-2. Rules must be checkable by lint.
-3. Rule updates must record effective date and impact scope.
+## 3. Why These Five Matter
 
-## `draft/stable` Write Gate (Minimum Recommendation)
+These are not bureaucratic extras. They prevent common failure modes.
 
-1. Any new factual claim without `source_ids` can only be written to `draft`, never directly to `stable`.
-2. Promotion from `draft` to `stable` should meet all three:
+1. Source keeps the field traceable.
+2. Normalization keeps same-type values comparable.
+3. Default behavior prevents empty or guessed values from masquerading as facts.
+4. Update strategy prevents fresh noise from overwriting older confirmed information.
+5. Conflict handling prevents the same page from drifting into long-term contradiction.
+
+## 4. Minimum Operational Requirements
+
+Once the five items exist, the rule is still not done until it is operational.
+
+At minimum:
+
+1. the rule must be documented
+2. the rule must be reviewable
+3. the rule should be lint-checkable
+4. rule changes should record effective date and impact scope
+
+## 5. `draft -> stable` Gate
+
+The most important write rule is simple: missing evidence means missing permission to stabilize.
+
+1. Any new factual claim without `source_ids` stays in `draft`.
+2. It does not go directly to `stable`.
+3. Promotion from `draft` to `stable` should require:
    - traceable `source_ids`
-   - one `read/grep` cross-check round completed
-   - current `property + link` minimum lint passed
-3. `query` outputs should default to write-back into `draft`, not directly overwrite `stable`.
-4. If a `stable` page must be changed, source trace and change trace should be kept (for example, change summary or log entry).
+   - one completed `read/grep` cross-check round
+   - passing minimum `property + link` lint
+4. `query` outputs should write back to `draft` by default, not overwrite `stable`.
+5. If a `stable` page changes, keep both source trace and change trace.
 
-## Source Basis (External Gist/Repo + Project Inference)
+## 6. How To Read This Rule In Practice
 
-Direct external sources:
+The point of the gate is not to slow the system down for its own sake.
+
+The point is to keep unfinished synthesis from quietly becoming durable knowledge. In a long-running wiki, the real risk is not one weak page. The real risk is that a weak page gets cited back into later ingest and query cycles as if it were already settled.
+
+## 7. Upstream Basis And Project Extension
+
+This page is compatible with the source-grounded workflow shape found in Karpathy-style LLM wiki patterns, but the exact `draft/stable` gate is a project-level governance extension for this repository.
+
+Useful upstream references:
 
 1. Karpathy original gist: <https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f>
 2. Karpathy gist raw: <https://gist.githubusercontent.com/karpathy/442a6bf555914893e9891c11519de94f/raw/ac46de1ad27f92b28ac95459c782c07f6b8c964a/llm-wiki.md>
-3. Astro-Han/karpathy-llm-wiki (repo): <https://github.com/Astro-Han/karpathy-llm-wiki>
-4. xoai/sage-wiki (repo): <https://github.com/xoai/sage-wiki>
-
-Inference note:
-
-1. The `draft/stable` gate in this document is a governance extension for this project. It is derived from the source-grounded workflow in the gist/repo pattern and our survey findings, not a verbatim sentence from a single upstream source.
+3. Astro-Han/karpathy-llm-wiki: <https://github.com/Astro-Han/karpathy-llm-wiki>
+4. xoai/sage-wiki: <https://github.com/xoai/sage-wiki>

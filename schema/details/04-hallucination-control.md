@@ -1,88 +1,116 @@
-# Hallucination Control (Detailed)
+# Hallucination Control
 [中文](./04-hallucination-control.zh-CN.md) | **English**
 
-## 0. Background (Why This Matters)
+## The Short Version
 
-1. At the beginning, we used models with higher hallucination rates for compilation and maintenance, and factual deviations appeared in the Wiki.
-2. Later, we had to switch to lower-hallucination models and run multiple lint/grep/read rounds for repair.
-3. In one repair cycle, we fixed 7 entities, but still needed multiple grep/read rounds to stabilize.
-4. This shows that LLM-Wiki must follow a “low-hallucination-first” principle.
-5. The reason is direct: if older content contains hallucinations, new ingest/query rounds may keep citing it, and errors will be inherited and spread.
+In a robust LLM-Wiki, hallucination control is not a late-stage cleanup task. It is an upstream design choice.
 
-So this document is not for arguing “which model is stronger.”  
-It answers: in continuous Wiki maintenance, how to push hallucination risk lower.
+If the first ingest pass introduces invented names, dates, relationships, or citations, later `query`, `backfill`, and `lint` rounds tend to reuse those errors. Once that happens, the repository does not merely contain bad facts. It starts to build new structure on top of bad facts.
 
-## 1. Practical Cases (Anonymized)
+That is why this document frames the rule in a simple way:
 
-| Wiki Page | Status | Key Findings (Anonymized) |
-|---|---|---|
-| Entity A | Fixed | Corrected media source naming; added method/model description |
-| Entity B | Fixed | Resolved key date conflicts |
-| Entity C | Supplemented | Added alias and identity information |
-| Entity D | Fixed | Split same-name confusion; corrected wrong jump links |
-| Entity E | Supplemented | Added competition result and work list |
-| Entity F | Fixed | Corrected participant-count statement; synchronized subpage information |
+1. Prefer lower-hallucination models for ingest and high-risk factual synthesis.
+2. Treat benchmark numbers as routing signals, not marketing slogans.
+3. Add extra verification whenever a page is likely to become a structural reference for other pages.
 
-## 2. Same-Benchmark Model Comparison (Primary Benchmark: Vectara)
+## Why This Matters
 
-Main leaderboard page update date: 2026-03-20 (no newer public update as of 2026-04-17).
+LLM-Wiki maintenance has a compounding failure mode.
 
-| Vendor/Model Entry | Hallucination Rate | Notes |
-|---|---:|---|
-| deepseek-ai/DeepSeek-V3.2-Exp | 5.3% | Relatively low under the same benchmark |
-| openai/gpt-5.4-nano-2026-03-17 | 3.1% | One of the lower entries under the same benchmark |
-| openai/gpt-5.4-mini-2026-03-17 | 5.5% | Relatively low under the same benchmark |
-| MiniMaxAI/minimax-m2p5 | 9.1% | Better than `minimax-m2p1(11.8%)` on the same leaderboard |
-| zai-org/GLM-4.7-flash | 9.3% | Newer than `GLM-4.5-AIR-FP8`, same value under this benchmark |
-| zai-org/glm-5 | 10.1% | Newer version, but higher under this benchmark |
-| anthropic/claude-haiku-4-5-20251001 | 9.8% | Current visible Haiku entry |
-| anthropic/claude-sonnet-4-6 | 10.6% | Newer than `claude-sonnet-4(10.3%)`, but higher |
-| moonshotai/Kimi-K2.5 | 14.2% | Current visible Kimi primary entry |
-| moonshotai/Kimi-K2-Instruct-0905 | 17.9% | In-family comparison entry |
+1. One page contains a wrong statement.
+2. Later pages `read` or `grep` that page while building relations.
+3. The wrong statement is copied, paraphrased, or normalized into multiple new pages.
+4. The repo now has several consistent-looking pages that all repeat the same mistake.
 
-Additional notes:
-1. Codex appears on some evaluation pages, but static pages do not provide one unified, citable hallucination-rate number.
-2. A newer version does not necessarily mean a lower hallucination rate. Selection should use same-benchmark measured values.
+At that point, the problem is no longer "one hallucination." The problem is "a local falsehood that has become part of the graph."
 
-## 3. How To Read These Scores
+This is why hallucination control belongs near the start of the workflow, alongside source handling and file ownership, rather than at the very end.
 
-1. Only results from the same leaderboard can be compared directly.
-2. Different leaderboards (SimpleQA, AA-Omniscience, Vectara) use different definitions, so absolute values are not directly comparable.
-3. This is mainly a summarization-task benchmark and does not equal your full production-task profile.
-4. When reading hallucination rate, also check answer rate to avoid single-metric misjudgment.
+## What This Document Is For
 
-## 4. A Simple Judgment: If Initial Compilation Is Not Clean, It Becomes Hard To Lower Later
+Use this page when deciding:
 
-Use a simple formula first:
+1. which model should handle first-pass ingest,
+2. which pages require secondary verification,
+3. when a change should remain `draft` instead of returning to `stable`.
+
+This page is not trying to prove that one vendor is universally best. It only defines a practical operating rule for this repository: when factual error propagation is expensive, lower hallucination risk is strategically valuable.
+
+## How To Read Public Hallucination Benchmarks
+
+Public benchmark numbers can help, but only if they are read carefully.
+
+1. Compare entries only within the same benchmark.
+2. Treat newer model versions as new candidates, not automatic upgrades.
+3. Read the benchmark as one input into routing decisions, not as a complete production guarantee.
+4. Watch for task mismatch: a summarization benchmark is useful, but it is not identical to full wiki authoring.
+
+In other words, a benchmark should answer "which model is less likely to invent under this measurement," not "which model can replace judgment."
+
+## A Practical Rule Of Thumb
+
+The cost of hallucination is not linear.
+
+When a maintenance round creates many new pages, links many old pages, or rewrites summary layers, one wrong factual seed can reappear many times. A simple way to think about it is:
 
 \[
-\Delta H \approx p \times (n_{entity}+n_{concept}) + c \times n_{read/grep}
+\Delta H \approx p \times (n_{new\ facts}) + c \times n_{reuse}
 \]
 
 Where:
 
-1. \(p\): hallucination rate of the current model
-2. \(n_{entity}\): number of newly generated entities in this round
-3. \(n_{concept}\): number of newly generated concepts in this round
-4. \(n_{read/grep}\): number of read/grep operations for relation-building in this round
-5. \(c\): average impact factor of each read/grep operation carrying old errors into new pages
-6. \(\Delta H\): newly added hallucination amount in this round
+1. \(p\) is the model's tendency to generate unsupported claims under the task,
+2. \(n_{new\ facts}\) is the number of new factual units introduced,
+3. \(n_{reuse}\) is the amount of old content reused during relation-building,
+4. \(c\) is the average cost of inheriting one prior mistake into a new page.
 
-This means:  
-If one compilation round produces many entities/concepts and the model hallucination rate is high, newly added hallucinations increase significantly.  
-When adding new relations later, agents repeatedly read/grep old pages. If old pages already contain hallucinations, those errors keep entering new pages.  
-So even after fixes begin (for example, 7 entities were already fixed in this cycle), multiple grep/read/lint rounds are often still required to push down the overall hallucination level.
+The equation is only a mental model, but it captures the operational truth: a noisy first pass makes the whole graph more expensive to repair later.
 
-## 5. Execution Recommendations (Low-Hallucination First)
+## Recommended Operating Policy
 
-1. For ingest compilation, prioritize lower-hallucination models under the same benchmark.
-2. For critical query conclusions, perform secondary verification, focusing on sources and links.
-3. After changes on high-risk pages, add one extra read/grep validation round before moving back to stable.
-4. After each repair round, run lint and keep snapshots for comparison.
+### 1. Use lower-hallucination models for ingest
 
-## 6. Data Sources (Reproducible)
+If a task is generating page skeletons, summarizing sources into canonical facts, or creating pages likely to be linked everywhere else, the safer default is the lower-hallucination option available to the team.
 
-1. Main leaderboard (GitHub): https://github.com/vectara/hallucination-leaderboard
-2. Leaderboard raw text (README): https://raw.githubusercontent.com/vectara/hallucination-leaderboard/main/README.md
-3. Methodology (README#Methodology): https://github.com/vectara/hallucination-leaderboard#methodology
-4. Vectara methodology blog: https://www.vectara.com/blog/introducing-the-next-generation-of-vectaras-hallucination-leaderboard
+### 2. Escalate verification for high-leverage pages
+
+Not every page carries the same risk. Add a secondary check when a page is:
+
+1. an index, glossary, chronology, or synthesis page,
+2. a frequently linked entity or concept,
+3. a page that resolves identity, naming, or date conflicts,
+4. a page that will be used as a later aggregation source.
+
+### 3. Keep risky pages in `draft`
+
+If source grounding is incomplete, cross-page consistency is unclear, or a recent rewrite touched many links, keep the page in `draft` until another pass confirms the facts.
+
+### 4. Lint after factual repair, not only after formatting changes
+
+After hallucination repair, run structure and link checks again. Factual cleanup often changes aliases, backlinks, dates, or page targets, which means it can silently create new structural issues.
+
+## What Good Practice Looks Like
+
+Good hallucination control in this repo usually looks like this:
+
+1. the model used for ingest is chosen for factual restraint, not just fluency,
+2. pages with higher blast radius receive a second verification pass,
+3. pages with unresolved contradictions stay visibly provisional,
+4. the team treats old wiki content as fallible unless it has already been stabilized.
+
+That last point matters. A wiki page is not trustworthy merely because it already exists. In a living LLM-Wiki, existing content is part of the evidence chain, but it is also a potential carrier of prior mistakes.
+
+## Data Sources
+
+The benchmark references that informed this guidance are listed below for reproducibility:
+
+1. Vectara Hallucination Leaderboard: <https://github.com/vectara/hallucination-leaderboard>
+2. Leaderboard README: <https://raw.githubusercontent.com/vectara/hallucination-leaderboard/main/README.md>
+3. Methodology section: <https://github.com/vectara/hallucination-leaderboard#methodology>
+4. Methodology overview: <https://www.vectara.com/blog/introducing-the-next-generation-of-vectaras-hallucination-leaderboard>
+
+## See Also
+
+1. [SPEC](../SPEC.md)
+2. [robust-llm-wiki-CLAUDE.md](../robust-llm-wiki-CLAUDE.md)
+3. [07-turbo-model-value.md](./07-turbo-model-value.md)

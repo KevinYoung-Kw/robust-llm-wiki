@@ -92,9 +92,9 @@ Purpose: define red lines, operating rules, extension boundaries, and governance
 
 ## Quick Start
 
-1. Read [schema/README.md](./schema/README.md).
-2. Follow it into [schema/SPEC.md](./schema/SPEC.md) and [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
-3. Use [research/RESEARCH.md](./research/RESEARCH.md) and snapshots as evidence anchors when adapting this framework.
+1. Start with [quickstart/README.md](./quickstart/README.md).
+2. Choose the path that matches you: adapt this framework into an existing LLM-Wiki, or generate a fresh `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` from this repo's operating guide.
+3. Then continue into [schema/README.md](./schema/README.md), [schema/SPEC.md](./schema/SPEC.md), and [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
 
 ## Karpathy Kernel (Do Not Drift)
 

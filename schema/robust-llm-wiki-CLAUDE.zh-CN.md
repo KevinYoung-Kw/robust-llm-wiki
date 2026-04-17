@@ -2,7 +2,7 @@
 
 **中文** | [English](./robust-llm-wiki-CLAUDE.md)
 
-> 状态：`v0.1.1` 当前生效的 operator policy
+> 状态：`v0.1.2` 当前生效的 operator policy
 > 范围：这份文档是本仓库内 agent 的运行手册。
 > 边界：`SPEC.md` 负责解释系统是什么；这份文档负责解释怎样安全地运行它。
 
@@ -41,6 +41,56 @@
 5. 让 human / AI 分工始终清晰：human 决定目标、来源范围和例外处理；agent 负责维护、综合和结构化检查。
 6. 遇到不确定时，宁可显式保留不确定，也不要靠自信措辞把问题抹平。
 7. 让 provenance 和 compliance 可见。不要接收来源不明或许可不清的第三方材料；需要 contributor rights attestation 与第三方 source/license metadata；需要维护 dependency 的 license/version inventory；安全问题优先走私密披露通道。
+
+### 3.1 “保留 Karpathy 内核”到底具体指什么
+
+“保留 Karpathy 内核”这句话，如果只停留在抽象层，其实不够让 agent 形成正确操作图景。Agent 需要能够把原始模式在脑子里看成一套具体工作方式。
+
+至少应当把原始基线理解成下面这些内容：
+
+1. 整个系统有三层：`raw sources`、`wiki`、`schema`。
+2. `raw sources` 是不可变输入文档。agent 负责读取它们，但不重写它们。
+3. `wiki` 是被维护的 markdown 知识库。agent 可以在这里创建、修订、补链和整理页面。
+4. `schema` 是运行契约。它告诉 agent：wiki 应该长什么样、`ingest/query/lint` 应该怎么跑、什么样的维护才算合格。
+
+Karpathy 原始模式里的核心流程也不是象征性的，而是很具体的：
+
+1. `ingest` 读取一个新加入的 source，
+2. 写入或更新这个 source 的 summary page，
+3. 更新相关的 entity、concept、comparison、overview 或 synthesis 页面，
+4. 更新 `index.md`，
+5. 在 `log.md` 里追加一条操作记录。
+
+这意味着，ingest 不是“写一份摘要就结束”。一份 source 完全可能触发很多现有页面的联动更新，因为这个模式的目标本来就是持续维护整张 wiki 图谱。
+
+### 3.2 原始模式里的 Query 和 Lint 到底是什么
+
+原始模式里的 `query` 和 `lint`，其实也比很多 agent 直觉里的理解更具体。
+
+对 `query` 来说：
+
+1. agent 默认先搜索 wiki，而不是先回到 raw corpus；
+2. 经常会先读 `index.md`，再钻取具体页面；
+3. 回答是基于已维护的 wiki 页面做综合；
+4. 有价值的 answer artifact 可以被回存成新的 markdown 页面，而不是只留在聊天记录里。
+
+对 `lint` 来说：
+
+1. agent 会检查跨页矛盾；
+2. 会检查是否有被新来源覆盖但尚未更新的陈旧说法；
+3. 会检查孤页、弱交叉引用、或本该存在但尚未建页的重要 concept；
+4. 会提出具体维护动作，让 wiki 在规模增长时仍然保持健康。
+
+所以 `lint` 在 Karpathy 模式里不只是格式检查，而是周期性的 wiki 健康巡检。
+
+### 3.3 `index.md` 和 `log.md` 是基线的一部分
+
+Agent 还应当把 `index.md` 与 `log.md` 当作一等运行文件，而不是“可有可无的装饰”。
+
+1. `index.md` 是面向内容的目录，它既是人类入口，也是 agent 的第一导航面。
+2. `log.md` 是按时间追加、append-only 的操作记录，用来记录 ingest、query、lint 等关键动作，而且最好保持 parseable。
+
+如果一个实现完全没有这两个文件，它依然可以说“受 LLM-Wiki 启发”，但已经不算非常贴近原始基线。
 
 ## 4. 有意识地运行核心闭环
 

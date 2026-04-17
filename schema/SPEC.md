@@ -2,7 +2,7 @@
 [中文](./SPEC.zh-CN.md) | **English**
 
 > Status: Stable architecture/reference
-> Version: `v0.1.1`
+> Version: `v0.1.2`
 > Scope: This file defines what Robust LLM-Wiki is and what it must preserve. It does not define operator workflow details or tool-specific runbooks.
 
 ## 1. Why Robust LLM-Wiki Exists

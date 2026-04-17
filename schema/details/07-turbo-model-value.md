@@ -1,48 +1,97 @@
-# The Value Of Turbo Models (Low-Parameter Models) (Detailed)
+# The Value Of Turbo Models
 [中文](./07-turbo-model-value.zh-CN.md) | **English**
 
-## 0. Background (Why Add This Item)
+## The Short Version
 
-In real Wiki maintenance, we observed a stable pattern:
+Turbo or lower-cost models are often not the best choice for first-pass knowledge synthesis.
 
-1. Turbo/low-parameter models such as `GPT-5.3-Codex-Spark` and `GLM-5-Turbo` are average at “creating new wiki pages.”
-2. But they perform very well at “maintaining wikilinks, checking format, and fixing structural consistency.”
+They can, however, be excellent choices for maintenance work with clearer rules and tighter boundaries: links, fields, formatting, cleanup, consistency passes, and other repetitive structural tasks.
 
-So this section is not a “model ranking”; it is a task-division recommendation.
+So this page is not a ranking. It is a routing guide.
 
-## 1. Tasks Suitable For Turbo Models
+## Why This Distinction Matters
 
-1. Wikilink maintenance: add links, repair broken links, backlink checks, and patching after isolated-page scans.
-2. Format maintenance: frontmatter completeness, date-format consistency, naming conventions, heading hierarchy cleanup.
-3. Structural lint: minimum-structure checks for `entity/concept/source/synthesis` pages.
-4. Batch consistency: attribute alignment for similar pages, template-residue cleanup, duplicate-format-noise cleanup.
+LLM-Wiki work is not one task. It is a stack of different tasks with different risk profiles.
 
-Shared characteristics of these tasks:  
-clear rules, explicit goals, and relatively stable decision boundaries.
+Some tasks demand careful fact integration, ambiguity handling, and narrative judgment. Others are closer to constrained maintenance: fix the link, normalize the field, repair the heading, remove the residue.
 
-## 2. Tasks Not Recommended For Turbo-Only Execution
+When those two categories are treated as identical, teams often either:
 
-1. Creating high-quality new entity/concept pages (especially when multi-source synthesis is needed).
-2. High-uncertainty fact merging and conflict arbitration.
-3. Synthesis writing that requires strong narrative ability or deep reasoning.
+1. overspend on simple maintenance, or
+2. underspecify high-risk synthesis.
 
-These tasks rely more on knowledge integration and expression quality, and are not ideal for low-parameter-only execution.
+The point of this document is to keep model allocation aligned with task shape.
 
-## 3. Recommended Division Of Labor (Proposal)
+## Where Turbo Models Usually Shine
 
-1. Creation stage: prioritize a more stable primary model for fact compilation and page skeleton building.
-2. Maintenance stage: use Turbo models for wikilinks, format, field consistency, and batch cleanup.
-3. Regression stage: run another review on high-risk pages by humans or higher-capability models.
+Turbo-style models are often strong fits for work that is:
 
-The core is not “who is stronger,” but “placing each model in the most suitable position.”
+1. rule-bound,
+2. repetitive,
+3. easy to verify,
+4. low-risk if reviewed once more at the end.
 
-## 4. Relationship With Karpathy Core
+Typical examples include:
 
-This proposal does not change the bottom line:
+1. wikilink repair and backlink maintenance,
+2. frontmatter and required-field cleanup,
+3. heading and formatting normalization,
+4. duplicate residue or template-noise removal,
+5. batch consistency checks across similar pages,
+6. lightweight structural lint assistance.
 
-1. It is still a Wiki, not chat logs.
-2. It still uses wikilink network structure as the core.
-3. It still serves the `ingest -> query -> lint` maintenance loop.
+These are not trivial tasks, but their boundaries are usually clearer than open-ended synthesis.
 
-The value of Turbo is:  
-making maintenance actions faster, more stable, and cheaper, so the loop is more sustainable.
+## Where Turbo Models Should Not Be The Default
+
+Turbo models are a weaker default when the work requires:
+
+1. creating new entity or concept pages from mixed sources,
+2. resolving conflicting facts,
+3. writing synthesis pages that need careful narration,
+4. handling ambiguous identity or timeline problems,
+5. producing pages that will become high-authority references inside the repo.
+
+These tasks are more expensive when wrong, so they deserve stronger factual and reasoning margins.
+
+## A Practical Division Of Labor
+
+A healthy pattern for this repository is:
+
+1. use a stronger or lower-hallucination primary model for ingest and factual synthesis,
+2. use turbo models for link, format, field, and consistency maintenance,
+3. send high-risk outputs back through either human review or a stronger second pass before stabilization.
+
+This is the same design instinct found elsewhere in the framework: do not ask one tool to be equally good at every layer of the loop.
+
+## Why Turbo Still Matters Strategically
+
+Turbo models are valuable not because they replace the core model, but because they keep the maintenance loop sustainable.
+
+They allow the repo to do more of the following at reasonable cost:
+
+1. routine cleanup,
+2. post-write guardrails,
+3. repeated consistency passes,
+4. broad but shallow maintenance sweeps.
+
+If these tasks are too expensive, teams delay them. When teams delay them, small inconsistencies accumulate. Over time, that weakens the whole wiki.
+
+So the strategic value of turbo is not glamour. It is upkeep.
+
+## Relationship To The Core Framework
+
+Nothing in this page changes the central commitments of robust LLM-Wiki:
+
+1. the repo is still a wiki rather than a transcript dump,
+2. wikilinks still matter as structure,
+3. `ingest -> query -> lint` remains the maintenance loop,
+4. stronger judgment is still reserved for higher-risk tasks.
+
+Turbo models become useful precisely because the framework already distinguishes between "authoring knowledge" and "maintaining knowledge structure."
+
+## See Also
+
+1. [04-hallucination-control.md](./04-hallucination-control.md)
+2. [03-lint-playbook.md](./03-lint-playbook.md)
+3. [robust-llm-wiki-CLAUDE.md](../robust-llm-wiki-CLAUDE.md)

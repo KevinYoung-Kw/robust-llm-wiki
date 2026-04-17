@@ -1,19 +1,19 @@
-# Attribute Proposal (Detailed)
+# Page Attribute Contract
 [中文](./01-attribute-proposal.zh-CN.md) | **English**
 
-## Background
+> Use this page when you need to answer a simple question: what fields should a production wiki page carry so the repository stays traceable and maintainable?
 
-1. During large-scale LLM-Wiki maintenance, we found that body text alone is hard to maintain stably.
-2. Pages are read by both humans and AI. Without baseline attributes, ingest/query/lint quickly becomes inconsistent.
-3. The goal of this document is not “adding more fields,” but proposing a minimum and extensible field convention.
+## 1. The Short Answer
 
-## Why Attribute Proposal Is Needed
+Body text alone is not enough once a wiki grows.
 
-1. Without unified attributes, pages of the same type end up in different structures, slowing down later query and validation.
-2. Without a minimum field contract, many checks depend on repeated grep/read, and maintenance cost keeps rising.
-3. If attributes are agreed first, extending fields such as `topic` and `status` later is more stable.
+When pages are read by both humans and AI, a page needs a small amount of stable metadata so ingest, query, and lint can keep agreeing on what the page is, where it came from, and whether it is ready to trust.
 
-## Recommended Field Set (Trimmable)
+That is why this document recommends a minimum page attribute contract.
+
+## 2. Recommended Minimum Fields
+
+A stable production page should usually carry at least:
 
 ```yaml
 id: "wk-..."
@@ -22,26 +22,57 @@ type: "entity|concept|topic|source|synthesis"
 source_ids:
   - "src-..."
 last_reviewed: "YYYY-MM-DD"
-status: "draft|stable|deprecated"   # experimental
-topic: "..."                        # experimental
-category: "..."                     # extensible
+status: "draft|stable|deprecated"
+topic: "..."      # optional / project-specific
+category: "..."   # optional / project-specific
 ```
 
-## What Each Field Is For
+The first six fields are the important part. The last two are examples of safe extension points.
 
-| Field | Purpose |
+## 3. What These Fields Are For
+
+| Field | Why it exists |
 |---|---|
-| `id` | Gives each page a stable identifier for deduplication and updates. |
-| `title` | Helps both humans and AI locate the page quickly. |
-| `type` | Clarifies page type for rule-based routing. |
-| `source_ids` | Preserves source trace for provenance. |
-| `last_reviewed` | Records latest review date for staleness detection. |
-| `status` | Distinguishes draft/stable/deprecated states. |
-| `topic` | Supports topic-based organization. |
-| `category` | Reserves room for project-specific custom categories. |
+| `id` | Gives the page a stable identity for deduplication, updates, and references. |
+| `title` | Makes the page easy for both humans and AI to locate. |
+| `type` | Tells the system what kind of page it is routing or validating. |
+| `source_ids` | Preserves provenance so claims can be traced back to evidence. |
+| `last_reviewed` | Makes freshness and staleness visible. |
+| `status` | Separates draft knowledge from stable knowledge. |
+| `topic` | Helps projects group pages by theme if needed. |
+| `category` | Leaves room for project-specific classification. |
 
-## Usage Principles
+## 4. How To Use This Contract
 
-1. These fields are recommendations, not a uniform hard mandate.
-2. Field count should be “enough to use,” not “the more the better.”
-3. Before adding new fields, define ingest rules first, then start batch writing.
+Use this field set as a minimum operating baseline, not as a decorative template.
+
+1. Keep the contract small enough that teams will actually maintain it.
+2. Treat the first six fields as the core production contract.
+3. Add project-specific fields only when they have a clear ingest-time meaning.
+4. If a field cannot be updated or validated consistently, it probably should not exist yet.
+
+## 5. Why This Contract Matters
+
+Without a shared attribute contract, pages of the same kind drift into different shapes.
+
+That creates a familiar failure pattern:
+
+1. ingest writes one shape
+2. query assumes another shape
+3. lint has to recover meaning with repeated grep/read passes
+
+The result is not just messy metadata. The result is rising maintenance cost.
+
+## 6. Extension Rule
+
+When you want to add a new field, do not start by writing it everywhere.
+
+Start by defining:
+
+1. where the field comes from
+2. how it is normalized
+3. what happens when evidence is missing
+4. when it should update
+5. how conflicts are resolved
+
+That next step is covered in [02-ingest-field-rules.md](./02-ingest-field-rules.md).

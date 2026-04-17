@@ -1,6 +1,6 @@
 # robust-llm-wiki-CLAUDE
 
-> Status: active operator policy for release `v0.1.1`
+> Status: active operator policy for release `v0.1.2`
 > Scope: this is the runbook for agents working in this repository.
 > Boundary: `SPEC.md` explains what the system is; this file explains how to run it safely.
 
@@ -39,6 +39,56 @@ Before talking about individual stages, it helps to keep a simple mental model i
 5. Keep the human/AI split legible: humans decide goals, source scope, and exception handling; agents do maintenance, synthesis, and structured checking.
 6. Prefer explicit uncertainty over silent guessing. If a claim is shaky, keep it marked, scoped, or blocked rather than smoothing it over.
 7. Keep provenance and compliance visible. Do not accept third-party material with unverifiable origin or unclear license. Require contributor rights attestation and third-party source or license metadata, keep dependency license and version inventory, keep repo license statements consistent with SPDX where practical, and route security disclosures through a private channel first.
+
+### 3.1 What "Preserve The Karpathy Kernel" Means In Practice
+
+The phrase "preserve the Karpathy kernel" is too abstract on its own. An agent should be able to picture the original operating pattern concretely.
+
+At minimum, the baseline looks like this:
+
+1. There are three layers: `raw sources`, `wiki`, and `schema`.
+2. `raw sources` are immutable input documents. The agent reads them, but does not rewrite them.
+3. `wiki` is the maintained markdown knowledge base. The agent is allowed to create, revise, and cross-link pages here.
+4. `schema` is the operating contract. It tells the agent how the wiki is shaped, how ingest/query/lint work, and what good maintenance looks like.
+
+The core workflow from Karpathy's original pattern is also concrete, not symbolic:
+
+1. `ingest` reads a newly added source,
+2. writes or updates a source summary page,
+3. updates relevant entity, concept, comparison, overview, or synthesis pages,
+4. updates `index.md`,
+5. appends an operation record to `log.md`.
+
+That means ingest is not "write one summary and stop." A single source may legitimately update many existing pages because the whole point is cumulative maintenance of the wiki graph.
+
+### 3.2 What Query And Lint Mean In The Original Pattern
+
+The original pattern also makes `query` and `lint` more specific than many agents assume.
+
+For `query`:
+
+1. the agent searches the wiki first, not the raw corpus first,
+2. often reads `index.md` before drilling into specific pages,
+3. synthesizes an answer from maintained wiki pages,
+4. may file valuable answer artifacts back into the wiki as new markdown pages instead of leaving them trapped in chat history.
+
+For `lint`:
+
+1. the agent scans for contradictions across pages,
+2. looks for stale claims superseded by newer sources,
+3. checks for orphan pages, weak cross-references, or important missing concept pages,
+4. suggests concrete maintenance actions that keep the wiki healthy as it grows.
+
+So `lint` is not just formatting. In the Karpathy pattern, it is a recurring wiki health pass.
+
+### 3.3 Two Special Files Are Part Of The Baseline
+
+Agents should also treat `index.md` and `log.md` as first-class operating files, not optional decoration.
+
+1. `index.md` is content-oriented. It is the catalog of the wiki and the first navigation surface for both humans and agents.
+2. `log.md` is chronological and append-only. It records ingests, queries, lint passes, and other meaningful operations in a parseable way.
+
+If an implementation omits these files, it can still be inspired by LLM-Wiki, but it is no longer following the original baseline very closely.
 
 ## 4. Run The Core Loop Deliberately
 
