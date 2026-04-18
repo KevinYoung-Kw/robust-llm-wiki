@@ -158,6 +158,7 @@ Robust 的重点是“维护机制更稳”。
 - Schema 入口页（ZH）：[schema/README.zh-CN.md](./schema/README.zh-CN.md)
 - Claude 顶层操作文档（EN）：[schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
 - Claude 顶层操作文档（ZH）：[schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)
+- Runtime 设计文档：[schema/details/09-agent-runtime-control-plane.zh-CN.md](./schema/details/09-agent-runtime-control-plane.zh-CN.md)
 - 详细规则目录：[schema/details/](./schema/details)
 - 开源治理（EN）：[schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
 - 开源治理（ZH）：[schema/OPEN_SOURCE_POLICY.zh-CN.md](./schema/OPEN_SOURCE_POLICY.zh-CN.md)
@@ -166,7 +167,7 @@ Robust 的重点是“维护机制更稳”。
 
 1. 先读 [quickstart/README.zh-CN.md](./quickstart/README.zh-CN.md)。
 2. 根据自己的情况选路径：把这套框架接入你现有的 LLM-Wiki，或者直接基于它生成新的 `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`。
-3. 然后再进入 [schema/README.zh-CN.md](./schema/README.zh-CN.md)、[schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md) 和 [schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)。
+3. 然后再进入 [schema/README.zh-CN.md](./schema/README.zh-CN.md)、[schema/SPEC.zh-CN.md](./schema/SPEC.zh-CN.md)、[schema/details/09-agent-runtime-control-plane.zh-CN.md](./schema/details/09-agent-runtime-control-plane.zh-CN.md) 和 [schema/robust-llm-wiki-CLAUDE.zh-CN.md](./schema/robust-llm-wiki-CLAUDE.zh-CN.md)。
 
 ## Karpathy 内核（不偏离）
 

@@ -36,6 +36,7 @@ If you only want the shortest correct path:
 2. [details/03-lint-playbook.md](./details/03-lint-playbook.md)
 3. [details/06-claude-hook-guidelines.md](./details/06-claude-hook-guidelines.md)
 4. [details/08-harmless-engineering.md](./details/08-harmless-engineering.md)
+5. [details/09-agent-runtime-control-plane.md](./details/09-agent-runtime-control-plane.md)
 
 ### I Need To Define Or Extend Fields
 
@@ -54,6 +55,7 @@ If you only want the shortest correct path:
 1. [robust-llm-wiki-CLAUDE.md](./robust-llm-wiki-CLAUDE.md)
 2. [details/05-file2agent-context-engineering.md](./details/05-file2agent-context-engineering.md)
 3. [details/08-harmless-engineering.md](./details/08-harmless-engineering.md)
+4. [details/09-agent-runtime-control-plane.md](./details/09-agent-runtime-control-plane.md)
 
 ### I Need Hallucination And Model Guidance
 
@@ -86,6 +88,7 @@ If you only want the shortest correct path:
 | [details/06-claude-hook-guidelines.md](./details/06-claude-hook-guidelines.md) | Hook trigger recommendations and lightweight guardrails |
 | [details/07-turbo-model-value.md](./details/07-turbo-model-value.md) | Where faster or lower-cost models help, and where they should not lead |
 | [details/08-harmless-engineering.md](./details/08-harmless-engineering.md) | Low-damage long-horizon agent behavior, observability, and model/runtime choice |
+| [details/09-agent-runtime-control-plane.md](./details/09-agent-runtime-control-plane.md) | Runtime design: roles, state, boundaries, handoffs, and observability |
 
 ## Reading Principle
 

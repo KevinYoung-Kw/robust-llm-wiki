@@ -36,6 +36,7 @@
 2. [details/03-lint-playbook.zh-CN.md](./details/03-lint-playbook.zh-CN.md)
 3. [details/06-claude-hook-guidelines.zh-CN.md](./details/06-claude-hook-guidelines.zh-CN.md)
 4. [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md)
+5. [details/09-agent-runtime-control-plane.zh-CN.md](./details/09-agent-runtime-control-plane.zh-CN.md)
 
 ### 我需要定义或扩展字段
 
@@ -54,6 +55,7 @@
 1. [robust-llm-wiki-CLAUDE.zh-CN.md](./robust-llm-wiki-CLAUDE.zh-CN.md)
 2. [details/05-file2agent-context-engineering.zh-CN.md](./details/05-file2agent-context-engineering.zh-CN.md)
 3. [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md)
+4. [details/09-agent-runtime-control-plane.zh-CN.md](./details/09-agent-runtime-control-plane.zh-CN.md)
 
 ### 我需要幻觉控制与模型分工建议
 
@@ -86,6 +88,7 @@
 | [details/06-claude-hook-guidelines.zh-CN.md](./details/06-claude-hook-guidelines.zh-CN.md) | hook 触发点建议与轻量级 guardrail |
 | [details/07-turbo-model-value.zh-CN.md](./details/07-turbo-model-value.zh-CN.md) | 更快或更便宜模型适合做什么、不适合做什么 |
 | [details/08-harmless-engineering.zh-CN.md](./details/08-harmless-engineering.zh-CN.md) | 长程 agent 调度里的低破坏性、可观测性与模型/运行栈选择 |
+| [details/09-agent-runtime-control-plane.zh-CN.md](./details/09-agent-runtime-control-plane.zh-CN.md) | runtime 设计：角色、状态、边界、handoff 与 observability |
 
 ## 一个简单原则
 

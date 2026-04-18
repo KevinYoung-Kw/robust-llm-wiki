@@ -157,6 +157,7 @@ Purpose: define red lines, operating rules, extension boundaries, and governance
 - Schema start-here guide (EN): [schema/README.md](./schema/README.md)
 - Schema start-here guide (ZH): [schema/README.zh-CN.md](./schema/README.zh-CN.md)
 - Claude operating guidance: [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md)
+- Runtime design note: [schema/details/09-agent-runtime-control-plane.md](./schema/details/09-agent-runtime-control-plane.md)
 - Detailed rules: [schema/details/](./schema/details)
 - Open-source policy (EN): [schema/OPEN_SOURCE_POLICY.md](./schema/OPEN_SOURCE_POLICY.md)
 - Open-source policy (ZH): [schema/OPEN_SOURCE_POLICY.zh-CN.md](./schema/OPEN_SOURCE_POLICY.zh-CN.md)
@@ -165,7 +166,7 @@ Purpose: define red lines, operating rules, extension boundaries, and governance
 
 1. Start with [quickstart/README.md](./quickstart/README.md).
 2. Choose the path that matches you: adapt this framework into an existing LLM-Wiki, or generate a fresh `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` from this repo's operating guide.
-3. Then continue into [schema/README.md](./schema/README.md), [schema/SPEC.md](./schema/SPEC.md), and [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
+3. Then continue into [schema/README.md](./schema/README.md), [schema/SPEC.md](./schema/SPEC.md), [schema/details/09-agent-runtime-control-plane.md](./schema/details/09-agent-runtime-control-plane.md), and [schema/robust-llm-wiki-CLAUDE.md](./schema/robust-llm-wiki-CLAUDE.md).
 
 ## Karpathy Kernel (Do Not Drift)
 
